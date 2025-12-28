@@ -1,33 +1,34 @@
-# Git Branch Workflow
-
-## Rule
-Before starting any new feature, improvement, or bug fix, always create a dedicated branch from an up-to-date `development` branch.
+# Git Workflow (Solo Development)
 
 ## Branch Structure
-- `main` - Production-ready code. Only receives merges from `development`.
-- `development` - Integration branch. All feature/fix branches merge here first.
-- Feature branches - Short-lived branches for specific work.
+- `main` - Production-ready code
+- `development` - Active development (default working branch)
 
-## Branch Naming Convention
-- `feature/` - for new features (e.g., `feature/add-file-upload`)
-- `fix/` - for bug fixes (e.g., `fix/login-redirect-issue`)
-- `improve/` - for improvements (e.g., `improve/file-service-performance`)
-- `refactor/` - for code refactoring (e.g., `refactor/drive-store`)
+## Daily Workflow
+1. Work directly on `development` for most changes
+2. Commit frequently with clear messages
+3. Push when ready: `git push origin development`
+4. Merge to `main` only for releases/deployments
 
-## Workflow
-1. Switch to development and pull latest: `git checkout development && git pull origin development`
-2. Create feature branch: `git checkout -b feature/your-feature-name`
-3. Make commits with clear messages
-4. When work is complete, merge into development: `git checkout development && git merge feature/your-feature-name`
-5. Push development: `git push origin development`
-6. Delete the feature branch: `git branch -d feature/your-feature-name`
+## When to Use Feature Branches
+Only create a branch when:
+- Experimenting with something you might abandon
+- Working on a large feature (multi-day) you want to isolate
+- Need to switch context and preserve work-in-progress
+
+```bash
+# If needed:
+git checkout -b feature/experimental-thing
+# ... work ...
+git checkout development && git merge feature/experimental-thing
+git branch -d feature/experimental-thing
+```
 
 ## Agent Behavior
-- After completing work on a feature/fix branch, the agent should merge it into `development`
-- The agent should NOT merge anything into `main` — that's reserved for user-controlled releases
+- Commit directly to `development` unless instructed otherwise
+- Never commit to `main` — that's for user-controlled releases
 
-## Important
-- Never commit directly to `main` or `development` branches
-- Only `development` can be merged into `main`
-- Keep branches focused on a single feature/fix
-- Delete branches after merging
+## Tips
+- Small, frequent commits > large, infrequent ones
+- Keep `development` in a working state
+- Use `git stash` for quick context switches
