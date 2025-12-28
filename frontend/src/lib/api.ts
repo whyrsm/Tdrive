@@ -1,8 +1,16 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
 });
+
+// Track if we're currently on the login page to avoid redirect loops
+const isLoginPage = () => window.location.pathname === '/login';
+
+// Check if error is a network/connection error (server unavailable)
+const isNetworkError = (error: AxiosError) => {
+  return !error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED';
+};
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
@@ -14,8 +22,15 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  (error: AxiosError) => {
+    // Don't clear token on network errors - server might just be restarting
+    if (isNetworkError(error)) {
+      return Promise.reject(error);
+    }
+
+    // Only clear token and redirect on actual 401 auth failures
+    // Skip if already on login page to avoid loops
+    if (error.response?.status === 401 && !isLoginPage()) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
