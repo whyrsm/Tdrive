@@ -1,14 +1,9 @@
-# Code Quality
-
-## Rule
-Always run linting and formatting before committing code.
+# Code Quality & Security
 
 ## Before Committing
-1. Run linter: `npm run lint` or `npx eslint .`
-2. Run formatter: `npm run format` or `npx prettier --write .`
-3. Fix any errors or warnings before committing
+1. Run `npm run lint` and `npm run format`
+2. Check `git diff` for hardcoded secrets
+3. Never commit `.env` files (use `.env.example` for templates)
 
-## Tips
-- Set up pre-commit hooks with husky + lint-staged for automation
-- Configure your IDE to format on save
-- Address linting warnings, don't just ignore them
+## Secrets
+Store in `.env` files: API keys, DB credentials, tokens, passwords, private keys.
