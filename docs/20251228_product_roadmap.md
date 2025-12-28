@@ -100,11 +100,44 @@ Core functionality is implemented:
 
 ---
 
+### Phase 5: Monetization (Plus Tier)
+
+**Goal:** Sustainable revenue through premium features
+
+**Pricing:** $5/month (or $48/year)
+
+| Feature | Free | Plus | Notes |
+|---------|------|------|-------|
+| Storage | Unlimited | Unlimited | Telegram provides this |
+| File management | ✓ | ✓ | Folders, upload, download |
+| Share links | Public only | Public + Private + Password + Expiry | Key upgrade trigger |
+| Workspaces | 1 | Unlimited | Separate file collections |
+| Organization | Folders | Folders + Tags + Colors + Starred | Visual organization |
+| Search | Basic | Full-text + Filters | Search within documents |
+| File history | — | 30-day version history | Restore previous versions |
+| Support | Community | Priority | Email support |
+
+**Implementation Priority:**
+
+| Feature | Priority | Complexity |
+|---------|----------|------------|
+| Public share links (Free) | High | Medium |
+| Private/password share links (Plus) | High | Medium |
+| Workspaces | High | High |
+| Tags & colors | Medium | Low |
+| Starred/favorites | Medium | Low |
+| File version history | Medium | High |
+| Full-text search | Low | High |
+| Payment integration (Stripe) | High | Medium |
+| User plan management | High | Medium |
+
+---
+
 ### Future Considerations
 
 - End-to-end encryption option (client-side)
 - Folder sharing between TDrive users
-- Team/workspace features
+- Team tier (shared workspaces, admin controls)
 - Third-party integrations
 - Browser extension for quick uploads
 
@@ -147,7 +180,9 @@ Core functionality is implemented:
 | v0.1.0 | — | MVP: Basic file operations |
 | v0.2.0 | — | Phase 2: Enhanced UX |
 | v0.3.0 | — | Phase 3: Advanced features |
-| v1.0.0 | — | Production-ready release |
+| v0.4.0 | — | Phase 4: PWA + Platform |
+| v1.0.0 | — | Production-ready + Free tier launch |
+| v1.1.0 | — | Plus tier + Payments |
 
 ---
 

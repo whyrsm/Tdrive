@@ -52,7 +52,7 @@ export function LoginPage() {
     try {
       const { data } = await authApi.verify(tempToken, code);
       login(data.accessToken);
-      navigate('/');
+      navigate('/drive');
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const backendMessage = axiosError.response?.data?.message;
@@ -73,10 +73,10 @@ export function LoginPage() {
       <div className="w-full max-w-sm mx-4">
         <div className="bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-9 h-9 btn-primary rounded flex items-center justify-center">
-              <span className="text-white font-semibold text-lg">T</span>
+            <div className="w-9 h-9 bg-[var(--text-primary)] rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xl">T</span>
             </div>
-            <span className="font-medium text-lg text-[var(--text-primary)]">TDrive</span>
+            <span className="font-medium text-lg text-[var(--text-primary)]">Telebox</span>
           </div>
 
           <h1 className="text-base font-medium text-center mb-6 text-[var(--text-primary)]">

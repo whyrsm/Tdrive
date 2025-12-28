@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth.store';
+import { LandingPage } from '@/pages/Landing';
 import { LoginPage } from '@/pages/Login';
 import { DrivePage } from '@/pages/Drive';
 
@@ -35,11 +36,15 @@ function AppRoutes() {
   return (
     <Routes>
       <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
+        path="/"
+        element={isAuthenticated ? <Navigate to="/drive" replace /> : <LandingPage />}
       />
       <Route
-        path="/"
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/drive" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/drive"
         element={
           <ProtectedRoute>
             <DrivePage />
