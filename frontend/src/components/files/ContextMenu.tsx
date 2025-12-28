@@ -44,7 +44,7 @@ export function ContextMenu({
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
-        className="fixed z-50 bg-white border border-[var(--border-color)] rounded-md shadow-lg py-1 min-w-[160px]"
+        className="fixed z-50 bg-white rounded-lg p-1 min-w-[160px] animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]"
         style={{ left: x, top: y }}
       >
         {menuItems.map((item, index) => (
@@ -55,12 +55,12 @@ export function ContextMenu({
               onClose();
             }}
             className={cn(
-              'w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left',
-              'hover:bg-[var(--hover-bg)]',
-              item.danger && 'text-red-600'
+              'w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded',
+              'hover:bg-[var(--bg-hover)] transition-colors',
+              item.danger ? 'text-[var(--accent-red)]' : 'text-[var(--text-primary)]'
             )}
           >
-            <item.icon size={16} />
+            <item.icon size={14} strokeWidth={2} className={item.danger ? '' : 'text-[var(--text-secondary)]'} />
             {item.label}
           </button>
         ))}

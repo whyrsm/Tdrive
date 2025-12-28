@@ -11,38 +11,38 @@ function UploadItemRow({ item }: { item: UploadItem }) {
     <div className="flex items-center gap-3 py-2 px-3 border-b border-[var(--border-color)] last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm truncate">{item.file.name}</span>
-          <span className="text-xs text-[var(--text-secondary)] shrink-0">
+          <span className="text-sm truncate text-[var(--text-primary)]">{item.file.name}</span>
+          <span className="text-xs text-[var(--text-tertiary)] shrink-0">
             {formatFileSize(item.file.size)}
           </span>
         </div>
         {item.status === 'uploading' && (
-          <div className="mt-1 h-1 bg-[var(--border-color)] rounded-full overflow-hidden">
+          <div className="mt-1 h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[var(--accent)] transition-all duration-300"
+              className="h-full bg-[var(--text-primary)] transition-all duration-300"
               style={{ width: `${item.progress}%` }}
             />
           </div>
         )}
         {item.status === 'error' && (
-          <p className="text-xs text-red-500 mt-0.5 truncate">{item.error || 'Upload failed'}</p>
+          <p className="text-xs text-[var(--accent-red)] mt-0.5 truncate">{item.error || 'Upload failed'}</p>
         )}
       </div>
 
       <div className="shrink-0">
         {item.status === 'pending' && (
-          <span className="text-xs text-[var(--text-secondary)]">Waiting...</span>
+          <span className="text-xs text-[var(--text-tertiary)]">Waiting...</span>
         )}
         {item.status === 'uploading' && (
-          <Loader2 size={16} className="animate-spin text-[var(--accent)]" />
+          <Loader2 size={14} strokeWidth={2} className="animate-spin text-[var(--text-secondary)]" />
         )}
-        {item.status === 'success' && <Check size={16} className="text-green-500" />}
+        {item.status === 'success' && <Check size={14} strokeWidth={2} className="text-[var(--accent-green)]" />}
         {item.status === 'error' && (
           <button
             onClick={() => removeUpload(item.id)}
-            className="p-1 hover:bg-[var(--hover-bg)] rounded"
+            className="p-1 hover:bg-[var(--bg-hover)] rounded transition-colors"
           >
-            <X size={14} />
+            <X size={12} strokeWidth={2} className="text-[var(--text-tertiary)]" />
           </button>
         )}
       </div>
@@ -74,8 +74,9 @@ export function UploadProgress() {
   return (
     <div
       className={cn(
-        'fixed bottom-4 right-4 z-50 bg-white rounded-lg shadow-lg border border-[var(--border-color)]',
-        'w-80 max-h-96 flex flex-col'
+        'fixed bottom-4 right-4 z-50 bg-white rounded-lg',
+        'w-72 max-h-80 flex flex-col',
+        'shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]'
       )}
     >
       {/* Header */}
@@ -84,8 +85,8 @@ export function UploadProgress() {
         onClick={() => setMinimized(!isMinimized)}
       >
         <div className="flex items-center gap-2">
-          {activeCount > 0 && <Loader2 size={14} className="animate-spin text-[var(--accent)]" />}
-          <span className="text-sm font-medium">
+          {activeCount > 0 && <Loader2 size={12} strokeWidth={2} className="animate-spin text-[var(--text-secondary)]" />}
+          <span className="text-sm font-medium text-[var(--text-primary)]">
             {activeCount > 0
               ? `Uploading ${activeCount} file${activeCount > 1 ? 's' : ''}`
               : completedCount > 0
@@ -93,8 +94,8 @@ export function UploadProgress() {
                 : `${errorCount} failed`}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          {isMinimized ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        <div className="flex items-center gap-1 text-[var(--text-tertiary)]">
+          {isMinimized ? <ChevronUp size={14} strokeWidth={2} /> : <ChevronDown size={14} strokeWidth={2} />}
         </div>
       </div>
 
@@ -112,7 +113,7 @@ export function UploadProgress() {
         <div className="px-3 py-2 border-t border-[var(--border-color)]">
           <button
             onClick={clearCompleted}
-            className="text-xs text-[var(--accent)] hover:underline"
+            className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
             Clear completed
           </button>

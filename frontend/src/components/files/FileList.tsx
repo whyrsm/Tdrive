@@ -28,14 +28,14 @@ export const FileList = memo(function FileList({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+        <Loader2 className="w-6 h-6 animate-spin text-[var(--text-tertiary)]" />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-[1fr_100px_120px] gap-4 px-4 py-2 text-xs font-medium text-[var(--text-secondary)] border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
+      <div className="grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 text-xs font-medium text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
         <span>Name</span>
         <span>Size</span>
         <span>Modified</span>
@@ -46,8 +46,8 @@ export const FileList = memo(function FileList({
           key={folder.id}
           data-folder-item
           className={cn(
-            'grid grid-cols-[1fr_100px_120px] gap-4 px-4 py-2 cursor-pointer',
-            'hover:bg-[var(--hover-bg)] border-b border-[var(--border-color)]',
+            'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-colors',
+            'hover:bg-[var(--bg-hover)]',
             selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]'
           )}
           onClick={(e) => handleClick(e, folder, 'folder')}
@@ -55,11 +55,11 @@ export const FileList = memo(function FileList({
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Folder size={18} className="text-[var(--accent)] flex-shrink-0" />
-            <span className="truncate text-sm">{folder.name}</span>
+            <Folder size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
+            <span className="truncate text-sm text-[var(--text-primary)]">{folder.name}</span>
           </div>
-          <span className="text-sm text-[var(--text-secondary)]">—</span>
-          <span className="text-sm text-[var(--text-secondary)]">
+          <span className="text-sm text-[var(--text-tertiary)]">—</span>
+          <span className="text-sm text-[var(--text-tertiary)]">
             {formatDate(folder.updatedAt)}
           </span>
         </div>
@@ -74,8 +74,8 @@ export const FileList = memo(function FileList({
             key={file.id}
             data-file-item
             className={cn(
-              'grid grid-cols-[1fr_100px_120px] gap-4 px-4 py-2 cursor-pointer',
-              'hover:bg-[var(--hover-bg)] border-b border-[var(--border-color)]',
+              'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-colors',
+              'hover:bg-[var(--bg-hover)]',
               selectedItems.has(file.id) && 'bg-[var(--selected-bg)]'
             )}
             onClick={(e) => handleClick(e, file, 'file')}
@@ -83,13 +83,13 @@ export const FileList = memo(function FileList({
             onContextMenu={(e) => onContextMenu(e, file, 'file')}
           >
             <div className="flex items-center gap-2 min-w-0">
-              <Icon size={18} className="text-[var(--text-secondary)] flex-shrink-0" />
-              <span className="truncate text-sm">{file.name}</span>
+              <Icon size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
+              <span className="truncate text-sm text-[var(--text-primary)]">{file.name}</span>
             </div>
-            <span className="text-sm text-[var(--text-secondary)]">
+            <span className="text-sm text-[var(--text-tertiary)]">
               {formatFileSize(file.size)}
             </span>
-            <span className="text-sm text-[var(--text-secondary)]">
+            <span className="text-sm text-[var(--text-tertiary)]">
               {formatDate(file.updatedAt)}
             </span>
           </div>
@@ -97,9 +97,9 @@ export const FileList = memo(function FileList({
       })}
 
       {folders.length === 0 && files.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-[var(--text-secondary)]">
-          <Folder size={48} className="mb-2 opacity-50" />
-          <p>This folder is empty</p>
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text-tertiary)]">
+          <Folder size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
+          <p className="text-sm">This folder is empty</p>
         </div>
       )}
     </div>

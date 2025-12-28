@@ -56,22 +56,22 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-secondary)]">
       <div className="w-full max-w-sm mx-4">
-        <div className="bg-white rounded-lg shadow-sm border border-[var(--border-color)] p-6">
+        <div className="bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-[var(--accent)] rounded flex items-center justify-center">
-              <span className="text-white font-bold text-xl">T</span>
+            <div className="w-9 h-9 bg-[var(--text-primary)] rounded flex items-center justify-center">
+              <span className="text-white font-semibold text-lg">T</span>
             </div>
-            <span className="font-semibold text-xl">TDrive</span>
+            <span className="font-medium text-lg text-[var(--text-primary)]">TDrive</span>
           </div>
 
-          <h1 className="text-lg font-medium text-center mb-6">
+          <h1 className="text-base font-medium text-center mb-6 text-[var(--text-primary)]">
             {step === 'phone' ? 'Sign in with Telegram' : 'Enter verification code'}
           </h1>
 
           {step === 'phone' ? (
             <form onSubmit={handleSendCode}>
               <div className="mb-4">
-                <label className="block text-sm text-[var(--text-secondary)] mb-1">
+                <label className="block text-sm text-[var(--text-secondary)] mb-1.5">
                   Phone number
                 </label>
                 <input
@@ -80,24 +80,27 @@ export function LoginPage() {
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+1234567890"
                   className={cn(
-                    'w-full px-3 py-2 rounded-md',
+                    'w-full px-3 py-2 rounded',
                     'border border-[var(--border-color)]',
-                    'focus:border-[var(--accent)] focus:outline-none'
+                    'focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25',
+                    'text-sm placeholder:text-[var(--text-placeholder)]',
+                    'transition-shadow'
                   )}
                 />
               </div>
 
               {error && (
-                <p className="text-red-600 text-sm mb-4">{error}</p>
+                <p className="text-[var(--accent-red)] text-sm mb-4">{error}</p>
               )}
 
               <button
                 type="submit"
                 disabled={!phone || isLoading}
                 className={cn(
-                  'w-full py-2 rounded-md',
-                  'bg-[var(--accent)] text-white font-medium',
-                  'hover:opacity-90 disabled:opacity-50'
+                  'w-full py-2 rounded',
+                  'bg-[var(--text-primary)] text-white font-medium text-sm',
+                  'hover:opacity-85 disabled:opacity-40',
+                  'transition-opacity'
                 )}
               >
                 {isLoading ? 'Sending...' : 'Send Code'}
@@ -110,7 +113,7 @@ export function LoginPage() {
               </p>
 
               <div className="mb-4">
-                <label className="block text-sm text-[var(--text-secondary)] mb-1">
+                <label className="block text-sm text-[var(--text-secondary)] mb-1.5">
                   Verification code
                 </label>
                 <input
@@ -120,24 +123,27 @@ export function LoginPage() {
                   placeholder="12345"
                   autoFocus
                   className={cn(
-                    'w-full px-3 py-2 rounded-md text-center text-lg tracking-widest',
+                    'w-full px-3 py-2 rounded text-center text-lg tracking-widest',
                     'border border-[var(--border-color)]',
-                    'focus:border-[var(--accent)] focus:outline-none'
+                    'focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25',
+                    'placeholder:text-[var(--text-placeholder)]',
+                    'transition-shadow'
                   )}
                 />
               </div>
 
               {error && (
-                <p className="text-red-600 text-sm mb-4">{error}</p>
+                <p className="text-[var(--accent-red)] text-sm mb-4">{error}</p>
               )}
 
               <button
                 type="submit"
                 disabled={!code || isLoading}
                 className={cn(
-                  'w-full py-2 rounded-md',
-                  'bg-[var(--accent)] text-white font-medium',
-                  'hover:opacity-90 disabled:opacity-50'
+                  'w-full py-2 rounded',
+                  'bg-[var(--text-primary)] text-white font-medium text-sm',
+                  'hover:opacity-85 disabled:opacity-40',
+                  'transition-opacity'
                 )}
               >
                 {isLoading ? 'Verifying...' : 'Verify'}
@@ -150,7 +156,7 @@ export function LoginPage() {
                   setCode('');
                   setError('');
                 }}
-                className="w-full mt-2 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                className="w-full mt-2 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 Use different number
               </button>
@@ -158,7 +164,7 @@ export function LoginPage() {
           )}
         </div>
 
-        <p className="text-xs text-center text-[var(--text-secondary)] mt-4">
+        <p className="text-xs text-center text-[var(--text-tertiary)] mt-4">
           Your files are stored in your Telegram Saved Messages
         </p>
       </div>

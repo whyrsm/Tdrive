@@ -27,12 +27,18 @@ export function RenameModal({ isOpen, currentName, onClose, onRename }: RenameMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg w-full max-w-sm mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div 
+        className="bg-white rounded-lg w-full max-w-sm mx-4 animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
-          <h2 className="font-medium">Rename</h2>
-          <button onClick={onClose} className="p-1 hover:bg-[var(--hover-bg)] rounded">
-            <X size={18} />
+          <h2 className="font-medium text-[var(--text-primary)]">Rename</h2>
+          <button 
+            onClick={onClose} 
+            className="p-1 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+          >
+            <X size={16} strokeWidth={2} />
           </button>
         </div>
 
@@ -44,10 +50,11 @@ export function RenameModal({ isOpen, currentName, onClose, onRename }: RenameMo
               onChange={(e) => setName(e.target.value)}
               autoFocus
               className={cn(
-                'w-full px-3 py-2 rounded-md',
+                'w-full px-3 py-2 rounded',
                 'border border-[var(--border-color)]',
-                'focus:border-[var(--accent)] focus:outline-none',
-                'text-sm'
+                'focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25',
+                'text-sm placeholder:text-[var(--text-placeholder)]',
+                'transition-shadow'
               )}
             />
           </div>
@@ -56,7 +63,7 @@ export function RenameModal({ isOpen, currentName, onClose, onRename }: RenameMo
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1.5 text-sm rounded-md hover:bg-[var(--hover-bg)]"
+              className="px-3 py-1.5 text-sm rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] transition-colors"
             >
               Cancel
             </button>
@@ -64,9 +71,10 @@ export function RenameModal({ isOpen, currentName, onClose, onRename }: RenameMo
               type="submit"
               disabled={!name.trim() || name.trim() === currentName}
               className={cn(
-                'px-4 py-1.5 text-sm rounded-md',
-                'bg-[var(--accent)] text-white',
-                'hover:opacity-90 disabled:opacity-50'
+                'px-3 py-1.5 text-sm rounded',
+                'bg-[var(--text-primary)] text-white',
+                'hover:opacity-85 disabled:opacity-40',
+                'transition-opacity'
               )}
             >
               Rename

@@ -97,7 +97,7 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
     if (loading) {
       return (
         <div className="flex items-center justify-center h-full">
-          <Loader2 className="animate-spin text-[var(--text-secondary)]" size={32} />
+          <Loader2 className="animate-spin text-[var(--text-tertiary)]" size={24} strokeWidth={2} />
         </div>
       );
     }
@@ -105,10 +105,10 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
     if (error) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4">
-          <p className="text-[var(--text-secondary)]">{error}</p>
+          <p className="text-[var(--text-secondary)] text-sm">{error}</p>
           <button
             onClick={() => onDownload(file)}
-            className="px-4 py-2 bg-[var(--accent)] text-white rounded-lg hover:opacity-90"
+            className="px-3 py-1.5 bg-[var(--text-primary)] text-white rounded text-sm hover:opacity-85 transition-opacity"
           >
             Download File
           </button>
@@ -162,7 +162,7 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
       case 'text':
         return (
           <div className="h-full overflow-auto p-6">
-            <pre className="text-sm font-mono whitespace-pre-wrap break-words">
+            <pre className="text-sm font-mono whitespace-pre-wrap break-words text-[var(--text-primary)]">
               {textContent}
             </pre>
           </div>
@@ -171,12 +171,12 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
       case 'unsupported':
         return (
           <div className="flex flex-col items-center justify-center h-full gap-4">
-            <p className="text-[var(--text-secondary)]">
+            <p className="text-[var(--text-secondary)] text-sm">
               Preview not available for this file type
             </p>
             <button
               onClick={() => onDownload(file)}
-              className="px-4 py-2 bg-[var(--accent)] text-white rounded-lg hover:opacity-90"
+              className="px-3 py-1.5 bg-[var(--text-primary)] text-white rounded text-sm hover:opacity-85 transition-opacity"
             >
               Download File
             </button>
@@ -187,42 +187,42 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
       onClick={onClose}
     >
       <div
-        className="relative w-full h-full max-w-7xl max-h-[90vh] m-4 bg-white rounded-lg shadow-xl flex flex-col"
+        className="relative w-full h-full max-w-6xl max-h-[90vh] m-4 bg-white rounded-lg flex flex-col animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold truncate">{file.name}</h2>
-            <p className="text-sm text-[var(--text-secondary)]">
+            <h2 className="text-sm font-medium truncate text-[var(--text-primary)]">{file.name}</h2>
+            <p className="text-xs text-[var(--text-tertiary)]">
               {formatFileSize(file.size)}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => onDownload(file)}
-              className="p-2 hover:bg-[var(--hover-bg)] rounded-lg"
+              className="p-2 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               title="Download"
             >
-              <Download size={20} />
+              <Download size={16} strokeWidth={2} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-[var(--hover-bg)] rounded-lg"
+              className="p-2 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               title="Close (Esc)"
             >
-              <X size={20} />
+              <X size={16} strokeWidth={2} />
             </button>
           </div>
         </div>
 
         {/* Preview Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-[var(--bg-secondary)]">
           {renderPreview()}
         </div>
 
@@ -233,25 +233,27 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
               onClick={navigatePrev}
               disabled={!hasPrev}
               className={cn(
-                'absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg',
-                'hover:bg-gray-50 transition-all',
-                !hasPrev && 'opacity-50 cursor-not-allowed'
+                'absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full transition-all',
+                'shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1)]',
+                'hover:bg-[var(--bg-hover)]',
+                !hasPrev && 'opacity-40 cursor-not-allowed'
               )}
               title="Previous (←)"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
             </button>
             <button
               onClick={navigateNext}
               disabled={!hasNext}
               className={cn(
-                'absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg',
-                'hover:bg-gray-50 transition-all',
-                !hasNext && 'opacity-50 cursor-not-allowed'
+                'absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full transition-all',
+                'shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1)]',
+                'hover:bg-[var(--bg-hover)]',
+                !hasNext && 'opacity-40 cursor-not-allowed'
               )}
               title="Next (→)"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
             </button>
           </>
         )}

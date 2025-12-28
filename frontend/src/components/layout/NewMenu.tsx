@@ -31,26 +31,27 @@ export function NewMenu({ onNewFolder, onUpload, onImport }: NewMenuProps) {
   const menuItems = [
     { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder },
     { icon: Upload, label: 'File Upload', onClick: onUpload },
-    { icon: Download, label: 'Import From Telegram', onClick: onImport },
+    { icon: Download, label: 'Import from Telegram', onClick: onImport },
   ];
 
   return (
     <div className="relative" ref={menuRef}>
+      {/* Notion-style button with subtle background */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 px-4 py-2 rounded-md',
-          'bg-[var(--accent)] text-white',
-          'hover:opacity-90 transition-opacity',
-          'text-sm font-medium shadow-sm'
+          'flex items-center gap-1.5 px-3 py-1.5 rounded',
+          'bg-[var(--bg-tertiary)] text-[var(--text-primary)]',
+          'hover:bg-[var(--bg-active)]',
+          'transition-colors text-sm font-medium'
         )}
       >
-        <Plus size={18} />
-        New
+        <Plus size={16} strokeWidth={2} />
+        <span>New</span>
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-[var(--border-color)] rounded-md shadow-lg py-1 z-50">
+        <div className="absolute left-0 top-full mt-1 w-52 bg-white rounded-lg p-1 z-50 animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
           {menuItems.map((item, index) => (
             <button
               key={index}
@@ -59,11 +60,12 @@ export function NewMenu({ onNewFolder, onUpload, onImport }: NewMenuProps) {
                 setIsOpen(false);
               }}
               className={cn(
-                'w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left',
-                'hover:bg-[var(--hover-bg)] transition-colors'
+                'w-full flex items-center gap-2 px-3 py-2 text-sm text-left rounded',
+                'hover:bg-[var(--bg-hover)] transition-colors',
+                'text-[var(--text-primary)]'
               )}
             >
-              <item.icon size={18} className="text-[var(--text-secondary)]" />
+              <item.icon size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
               <span>{item.label}</span>
             </button>
           ))}

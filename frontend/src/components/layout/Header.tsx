@@ -19,77 +19,83 @@ export function Header({ onSearch }: HeaderProps) {
   };
 
   return (
-    <header className="h-14 border-b border-[var(--border-color)] flex items-center px-4 gap-4 bg-white">
+    <header className="h-12 border-b border-[var(--border-color)] flex items-center px-4 gap-4 bg-white">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-[var(--accent)] rounded flex items-center justify-center">
-          <span className="text-white font-bold text-sm">T</span>
+        <div className="w-7 h-7 bg-[var(--text-primary)] rounded flex items-center justify-center">
+          <span className="text-white font-semibold text-sm">T</span>
         </div>
-        <span className="font-semibold text-lg">TDrive</span>
+        <span className="font-medium">TDrive</span>
       </div>
 
-      <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-auto">
+      <form onSubmit={handleSearch} className="flex-1 max-w-md mx-auto">
         <div className="relative">
           <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
+            size={16}
+            strokeWidth={2}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]"
           />
           <input
             type="text"
-            placeholder="Search files..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
-              'w-full pl-10 pr-4 py-2 rounded-md',
+              'w-full pl-9 pr-4 py-1.5 rounded',
               'bg-[var(--bg-secondary)] border border-transparent',
-              'focus:border-[var(--accent)] focus:outline-none',
-              'text-sm'
+              'focus:bg-white focus:border-[var(--border-strong)] focus:outline-none',
+              'text-sm placeholder:text-[var(--text-placeholder)]',
+              'transition-all duration-150'
             )}
           />
         </div>
       </form>
 
-      <div className="flex items-center gap-2">
-        <div className="flex border border-[var(--border-color)] rounded-md overflow-hidden">
+      <div className="flex items-center gap-1">
+        <div className="flex rounded overflow-hidden">
           <button
             onClick={() => setViewMode('grid')}
             className={cn(
-              'p-1.5',
-              viewMode === 'grid' ? 'bg-[var(--selected-bg)]' : 'hover:bg-[var(--hover-bg)]'
+              'p-1.5 rounded transition-colors',
+              viewMode === 'grid' 
+                ? 'bg-[var(--bg-active)] text-[var(--text-primary)]' 
+                : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)]'
             )}
           >
-            <Grid size={18} />
+            <Grid size={16} strokeWidth={2} />
           </button>
           <button
             onClick={() => setViewMode('list')}
             className={cn(
-              'p-1.5',
-              viewMode === 'list' ? 'bg-[var(--selected-bg)]' : 'hover:bg-[var(--hover-bg)]'
+              'p-1.5 rounded transition-colors',
+              viewMode === 'list' 
+                ? 'bg-[var(--bg-active)] text-[var(--text-primary)]' 
+                : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)]'
             )}
           >
-            <List size={18} />
+            <List size={16} strokeWidth={2} />
           </button>
         </div>
 
-        <div className="relative">
+        <div className="relative ml-2">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center hover:bg-[var(--hover-bg)]"
+            className="w-7 h-7 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center hover:bg-[var(--bg-active)] transition-colors"
           >
-            <User size={18} />
+            <User size={14} strokeWidth={2} className="text-[var(--text-secondary)]" />
           </button>
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-[var(--border-color)] rounded-md shadow-lg py-1 z-50">
+            <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-lg py-1 z-50 animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
               <div className="px-3 py-2 border-b border-[var(--border-color)]">
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-xs text-[var(--text-secondary)]">{user?.phone}</p>
               </div>
               <button
                 onClick={logout}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--hover-bg)] text-left"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--bg-hover)] text-left text-[var(--text-primary)] transition-colors"
               >
-                <LogOut size={16} />
+                <LogOut size={14} strokeWidth={2} className="text-[var(--text-secondary)]" />
                 Sign out
               </button>
             </div>
