@@ -16,19 +16,19 @@ export function useFileItemHandlers(
       return;
     }
 
-    // Single click opens files (for preview)
-    if (type === 'file') {
-      onFileOpen(item as FileItem);
-    }
+    // Single click only selects items
+    toggleSelect(item.id);
   };
 
   const handleDoubleClick = (
     item: FileItem | FolderItem,
     type: 'file' | 'folder'
   ) => {
-    // Double click opens folders
+    // Double click opens folders or files
     if (type === 'folder') {
       onFolderOpen(item as FolderItem);
+    } else {
+      onFileOpen(item as FileItem);
     }
   };
 

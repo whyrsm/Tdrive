@@ -26,7 +26,7 @@ export const FileGrid = memo(function FileGrid({
   onFileOpen,
   onContextMenu,
 }: FileGridProps) {
-  const { selectedItems } = useDriveStore();
+  const { selectedItems, clearSelection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
   const {
     dragCount,
@@ -51,9 +51,18 @@ export const FileGrid = memo(function FileGrid({
     );
   }
 
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    // Only clear selection if clicking directly on the background, not on items
+    const target = e.target as HTMLElement;
+    if (!target.closest('[data-file-item]') && !target.closest('[data-folder-item]')) {
+      clearSelection();
+    }
+  };
+
   return (
     <div 
-      className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-3"
+      className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-3 min-h-full content-start"
+      onClick={handleBackgroundClick}
       onDragOver={handleBackgroundDragOver}
       onDrop={handleDropOnBackground}
     >

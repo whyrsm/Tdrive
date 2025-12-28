@@ -26,7 +26,7 @@ export const FileList = memo(function FileList({
   onFileOpen,
   onContextMenu,
 }: FileListProps) {
-  const { selectedItems } = useDriveStore();
+  const { selectedItems, clearSelection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
   const {
     dragCount,
@@ -51,9 +51,18 @@ export const FileList = memo(function FileList({
     );
   }
 
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    // Only clear selection if clicking directly on the background, not on items
+    const target = e.target as HTMLElement;
+    if (!target.closest('[data-file-item]') && !target.closest('[data-folder-item]')) {
+      clearSelection();
+    }
+  };
+
   return (
     <div 
-      className="flex flex-col"
+      className="flex flex-col min-h-full"
+      onClick={handleBackgroundClick}
       onDragOver={handleBackgroundDragOver}
       onDrop={handleDropOnBackground}
     >
