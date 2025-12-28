@@ -30,6 +30,15 @@
   --selected-bg: rgba(35, 131, 226, 0.1);
 }
 
+/* Button styles */
+.btn-primary {
+  background-color: var(--text-primary);
+}
+
+.progress-bar {
+  background-color: var(--text-primary);
+}
+
 * {
   box-sizing: border-box;
 }

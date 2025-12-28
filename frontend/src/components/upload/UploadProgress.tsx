@@ -19,7 +19,7 @@ function UploadItemRow({ item }: { item: UploadItem }) {
         {item.status === 'uploading' && (
           <div className="mt-1 h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[var(--text-primary)] transition-all duration-300"
+              className="h-full progress-bar transition-all duration-300"
               style={{ width: `${item.progress}%` }}
             />
           </div>

@@ -21,7 +21,7 @@ export function Header({ onSearch }: HeaderProps) {
   return (
     <header className="h-12 border-b border-[var(--border-color)] flex items-center px-4 gap-4 bg-white">
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 bg-[var(--text-primary)] rounded flex items-center justify-center">
+        <div className="w-7 h-7 btn-primary rounded flex items-center justify-center">
           <span className="text-white font-semibold text-sm">T</span>
         </div>
         <span className="font-medium">TDrive</span>

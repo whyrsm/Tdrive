@@ -68,8 +68,8 @@ export function NewFolderModal({ isOpen, onClose, onCreate }: NewFolderModalProp
               type="submit"
               disabled={!name.trim()}
               className={cn(
-                'px-3 py-1.5 text-sm rounded',
-                'bg-[var(--text-primary)] text-white',
+                'px-3 py-1.5 text-sm rounded btn-primary',
+                'text-white',
                 'hover:opacity-85 disabled:opacity-40',
                 'transition-opacity'
               )}

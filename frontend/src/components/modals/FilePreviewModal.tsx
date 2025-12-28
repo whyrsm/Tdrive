@@ -108,7 +108,7 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
           <p className="text-[var(--text-secondary)] text-sm">{error}</p>
           <button
             onClick={() => onDownload(file)}
-            className="px-3 py-1.5 bg-[var(--text-primary)] text-white rounded text-sm hover:opacity-85 transition-opacity"
+            className="px-3 py-1.5 btn-primary text-white rounded text-sm hover:opacity-85 transition-opacity"
           >
             Download File
           </button>
@@ -176,7 +176,7 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
             </p>
             <button
               onClick={() => onDownload(file)}
-              className="px-3 py-1.5 bg-[var(--text-primary)] text-white rounded text-sm hover:opacity-85 transition-opacity"
+              className="px-3 py-1.5 btn-primary text-white rounded text-sm hover:opacity-85 transition-opacity"
             >
               Download File
             </button>

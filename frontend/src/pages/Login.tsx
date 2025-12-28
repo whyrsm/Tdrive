@@ -73,7 +73,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm mx-4">
         <div className="bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-9 h-9 bg-[var(--text-primary)] rounded flex items-center justify-center">
+            <div className="w-9 h-9 btn-primary rounded flex items-center justify-center">
               <span className="text-white font-semibold text-lg">T</span>
             </div>
             <span className="font-medium text-lg text-[var(--text-primary)]">TDrive</span>
@@ -117,8 +117,8 @@ export function LoginPage() {
                 type="submit"
                 disabled={!phone || isLoading}
                 className={cn(
-                  'w-full py-2 rounded',
-                  'bg-[var(--text-primary)] text-white font-medium text-sm',
+                  'w-full py-2 rounded btn-primary',
+                  'text-white font-medium text-sm',
                   'hover:opacity-85 disabled:opacity-40',
                   'transition-opacity'
                 )}
@@ -165,8 +165,8 @@ export function LoginPage() {
                 type="submit"
                 disabled={!code || isLoading}
                 className={cn(
-                  'w-full py-2 rounded',
-                  'bg-[var(--text-primary)] text-white font-medium text-sm',
+                  'w-full py-2 rounded btn-primary',
+                  'text-white font-medium text-sm',
                   'hover:opacity-85 disabled:opacity-40',
                   'transition-opacity'
                 )}

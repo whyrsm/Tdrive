@@ -229,7 +229,7 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
                 </div>
                 <div className="w-full bg-[var(--bg-tertiary)] rounded-full h-1.5">
                   <div 
-                    className="bg-[var(--text-primary)] h-1.5 rounded-full transition-all duration-300"
+                    className="progress-bar h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }}
                   />
                 </div>
@@ -409,8 +409,8 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
                 onClick={handleImport}
                 disabled={selectedFiles.size === 0 || importing}
                 className={cn(
-                  'px-3 py-1.5 text-sm rounded flex items-center gap-2',
-                  'bg-[var(--text-primary)] text-white',
+                  'px-3 py-1.5 text-sm rounded flex items-center gap-2 btn-primary',
+                  'text-white',
                   'hover:opacity-85 disabled:opacity-40',
                   'transition-opacity'
                 )}

@@ -71,8 +71,8 @@ export function RenameModal({ isOpen, currentName, onClose, onRename }: RenameMo
               type="submit"
               disabled={!name.trim() || name.trim() === currentName}
               className={cn(
-                'px-3 py-1.5 text-sm rounded',
-                'bg-[var(--text-primary)] text-white',
+                'px-3 py-1.5 text-sm rounded btn-primary',
+                'text-white',
                 'hover:opacity-85 disabled:opacity-40',
                 'transition-opacity'
               )}
