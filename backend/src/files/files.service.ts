@@ -13,16 +13,22 @@ export class FilesService {
   ) {}
 
   async findAll(userId: string, folderId?: string | null) {
-    return this.prisma.file.findMany({
+    const files = await this.prisma.file.findMany({
       where: {
         userId,
         folderId: folderId === undefined ? undefined : folderId,
       },
       orderBy: { name: 'asc' },
     });
+    return files.map(this.serializeFile);
   }
 
   async findOne(id: string, userId: string) {
+    const file = await this.findOneRaw(id, userId);
+    return this.serializeFile(file);
+  }
+
+  private async findOneRaw(id: string, userId: string) {
     const file = await this.prisma.file.findFirst({
       where: { id, userId },
     });
@@ -63,7 +69,7 @@ export class FilesService {
   }
 
   async download(id: string, userId: string): Promise<{ buffer: Buffer; file: any }> {
-    const file = await this.findOne(id, userId);
+    const file = await this.findOneRaw(id, userId);
     const client = await this.authService.getClientForUser(userId);
     
     try {
@@ -78,7 +84,7 @@ export class FilesService {
   }
 
   async move(id: string, userId: string, dto: MoveFileDto) {
-    await this.findOne(id, userId);
+    await this.findOneRaw(id, userId);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { folderId: dto.folderId || null },
@@ -87,7 +93,7 @@ export class FilesService {
   }
 
   async rename(id: string, userId: string, dto: RenameFileDto) {
-    await this.findOne(id, userId);
+    await this.findOneRaw(id, userId);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { name: dto.name },
@@ -96,7 +102,7 @@ export class FilesService {
   }
 
   async remove(id: string, userId: string) {
-    const file = await this.findOne(id, userId);
+    const file = await this.findOneRaw(id, userId);
     const client = await this.authService.getClientForUser(userId);
     
     try {
