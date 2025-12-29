@@ -9,6 +9,7 @@ interface LogoProps {
     iconSize?: number;
     size?: 'sm' | 'md' | 'lg';
     linkTo?: string;
+    showVersion?: boolean;
 }
 
 export function Logo({
@@ -17,7 +18,8 @@ export function Logo({
     textClassName,
     iconSize = 18,
     size = 'md',
-    linkTo
+    linkTo,
+    showVersion = false
 }: LogoProps) {
 
     const sizeClasses = {
@@ -50,13 +52,20 @@ export function Logo({
             )}>
                 <Cloud size={finalIconSize} fill="currentColor" />
             </div>
-            <span className={cn(
-                "font-bold tracking-tight text-[var(--text-primary)]",
-                currentSize.text,
-                textClassName
-            )}>
-                Telebox
-            </span>
+            <div className="flex items-center gap-1.5">
+                <span className={cn(
+                    "font-bold tracking-tight text-[var(--text-primary)]",
+                    currentSize.text,
+                    textClassName
+                )}>
+                    Telebox
+                </span>
+                {showVersion && (
+                    <span className="text-[10px] font-medium text-[var(--text-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded">
+                        v0.1.0
+                    </span>
+                )}
+            </div>
         </div>
     );
 

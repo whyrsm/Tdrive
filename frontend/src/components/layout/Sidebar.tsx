@@ -295,7 +295,12 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
       >
         {/* Mobile header */}
         <div className="flex items-center justify-between p-3 border-b border-[var(--border-color)]">
-          <span className="font-medium text-[var(--text-primary)]">Telebox</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-[var(--text-primary)]">Telebox</span>
+            <span className="text-[10px] font-medium text-[var(--text-tertiary)] bg-[var(--bg-tertiary)] px-1.5 py-0.5 rounded">
+              v0.1.0
+            </span>
+          </div>
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-1.5 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-secondary)]"

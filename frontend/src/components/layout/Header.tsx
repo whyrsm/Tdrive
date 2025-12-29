@@ -31,7 +31,7 @@ export function Header({ onSearch }: HeaderProps) {
         <Menu size={20} strokeWidth={2} />
       </button>
 
-      <Logo size="sm" linkTo="/drive" className="hidden sm:flex" />
+      <Logo size="sm" linkTo="/drive" className="hidden sm:flex" showVersion />
 
       {/* Desktop search */}
       <form onSubmit={handleSearch} className="hidden sm:block flex-1 max-w-md mx-auto">
