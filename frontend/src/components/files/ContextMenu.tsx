@@ -1,4 +1,4 @@
-import { Download, Pencil, Trash2, FolderInput, FolderPlus, Upload } from 'lucide-react';
+import { Download, Pencil, Trash2, FolderPlus, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ContextMenuProps {
@@ -8,7 +8,6 @@ interface ContextMenuProps {
   onClose: () => void;
   onDownload?: () => void;
   onRename: () => void;
-  onMove: () => void;
   onDelete: () => void;
   onNewFolder?: () => void;
   onUpload?: () => void;
@@ -21,7 +20,6 @@ export function ContextMenu({
   onClose,
   onDownload,
   onRename,
-  onMove,
   onDelete,
   onNewFolder,
   onUpload,
@@ -36,7 +34,6 @@ export function ContextMenu({
           ? [{ icon: Download, label: 'Download', onClick: onDownload }]
           : []),
         { icon: Pencil, label: 'Rename', onClick: onRename },
-        { icon: FolderInput, label: 'Move to...', onClick: onMove },
         { icon: Trash2, label: 'Delete', onClick: onDelete, danger: true },
       ];
 
@@ -57,7 +54,7 @@ export function ContextMenu({
             className={cn(
               'w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded',
               'hover:bg-[var(--bg-hover)] transition-colors',
-              item.danger ? 'text-[var(--accent-red)]' : 'text-[var(--text-primary)]'
+              item.danger ? 'text-[#dc2626]' : 'text-[var(--text-primary)]'
             )}
           >
             <item.icon size={14} strokeWidth={2} className={item.danger ? '' : 'text-[var(--text-secondary)]'} />

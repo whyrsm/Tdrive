@@ -7,6 +7,7 @@ import { ContextMenu } from '@/components/files/ContextMenu';
 import { UploadModal } from '@/components/modals/UploadModal';
 import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
+import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
 import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
 import ImportModal from '@/components/modals/ImportModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
@@ -28,9 +29,11 @@ export function DrivePage() {
     showNewFolder,
     showRename,
     showPreview,
+    showDeleteConfirm,
     previewFile,
     contextMenu,
     renameItem,
+    deleteItem,
     setShowUpload,
     setShowNewFolder,
     setContextMenu,
@@ -42,6 +45,8 @@ export function DrivePage() {
     handleContextMenu,
     openRenameModal,
     closeRenameModal,
+    openDeleteConfirm,
+    closeDeleteConfirm,
     closePreview,
   } = useDriveActions(currentFolderId);
 
@@ -142,10 +147,7 @@ export function DrivePage() {
               : undefined
           }
           onRename={openRenameModal}
-          onMove={() => {
-            // TODO: Implement move modal
-          }}
-          onDelete={handleDelete}
+          onDelete={openDeleteConfirm}
         />
       )}
 
@@ -164,7 +166,6 @@ export function DrivePage() {
             setBackgroundContextMenu(null);
           }}
           onRename={() => {}}
-          onMove={() => {}}
           onDelete={() => {}}
         />
       )}
@@ -186,6 +187,14 @@ export function DrivePage() {
         currentName={renameItem?.name || ''}
         onClose={closeRenameModal}
         onRename={handleRename}
+      />
+
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        itemName={deleteItem?.name || ''}
+        itemType={deleteItem?.type || 'file'}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleDelete}
       />
 
       {showPreview && previewFile && (

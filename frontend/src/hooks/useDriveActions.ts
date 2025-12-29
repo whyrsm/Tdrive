@@ -27,9 +27,11 @@ export function useDriveActions(currentFolderId: string | null) {
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameItem, setRenameItem] = useState<RenameItem | null>(null);
+  const [deleteItem, setDeleteItem] = useState<{ id: string; name: string; type: 'file' | 'folder' } | null>(null);
 
   const downloadFile = useDownloadFile();
   const createFolder = useCreateFolder();
@@ -54,14 +56,30 @@ export function useDriveActions(currentFolderId: string | null) {
     }
   };
 
-  const handleDelete = () => {
+  const openDeleteConfirm = () => {
     if (!contextMenu) return;
-    if (contextMenu.type === 'folder') {
-      deleteFolder.mutate({ id: contextMenu.item.id, parentId: currentFolderId });
-    } else {
-      deleteFile.mutate({ id: contextMenu.item.id, folderId: currentFolderId });
-    }
+    setDeleteItem({
+      id: contextMenu.item.id,
+      name: contextMenu.item.name,
+      type: contextMenu.type,
+    });
+    setShowDeleteConfirm(true);
     setContextMenu(null);
+  };
+
+  const handleDelete = () => {
+    if (!deleteItem) return;
+    if (deleteItem.type === 'folder') {
+      deleteFolder.mutate({ id: deleteItem.id, parentId: currentFolderId });
+    } else {
+      deleteFile.mutate({ id: deleteItem.id, folderId: currentFolderId });
+    }
+    setDeleteItem(null);
+  };
+
+  const closeDeleteConfirm = () => {
+    setShowDeleteConfirm(false);
+    setDeleteItem(null);
   };
 
   const handleFileOpen = (file: FileItem) => {
@@ -182,9 +200,11 @@ function getMimeTypeFromFilename(filename: string): string | null {
     showNewFolder,
     showRename,
     showPreview,
+    showDeleteConfirm,
     previewFile,
     contextMenu,
     renameItem,
+    deleteItem,
     // Setters
     setShowUpload,
     setShowNewFolder,
@@ -198,6 +218,8 @@ function getMimeTypeFromFilename(filename: string): string | null {
     handleContextMenu,
     openRenameModal,
     closeRenameModal,
+    openDeleteConfirm,
+    closeDeleteConfirm,
     closePreview,
   };
 }
