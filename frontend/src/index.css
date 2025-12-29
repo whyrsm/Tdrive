@@ -3,31 +3,28 @@
 :root {
   /* Backgrounds */
   --bg-primary: #ffffff;
-  --bg-secondary: #f7f6f3;
-  --bg-tertiary: #f1f1ef;
+  --bg-secondary: #F7F7F5; /* Warm/Off-white */
+  --bg-tertiary: #E9E9E7;
   --bg-hover: rgba(55, 53, 47, 0.08);
   --bg-active: rgba(55, 53, 47, 0.16);
-  
+
   /* Text */
-  --text-primary: #37352f;
+  --text-primary: #37352F; /* Dark charcoal */
   --text-secondary: #787774;
   --text-tertiary: #9b9a97;
   --text-placeholder: #c4c4c4;
-  
+  --text-inverse: #ffffff;
+
   /* Borders */
-  --border-color: rgba(55, 53, 47, 0.09);
+  --border-color: #E9E9E7; /* Subtle light gray */
   --border-strong: rgba(55, 53, 47, 0.16);
-  --divider: rgba(55, 53, 47, 0.09);
   
-  /* Accents (use sparingly) */
-  --accent: #2383e2;
-  --accent-red: #e03e3e;
-  --accent-green: #0f7b6c;
+  /* Accents */
+  --accent: #000000; /* Black for primary buttons */
+  --accent-secondary: #2383e2; /* Keep blue for other links if needed, or remove */
   
-  /* Legacy mappings */
-  --bg-sidebar: var(--bg-secondary);
-  --hover-bg: var(--bg-hover);
-  --selected-bg: rgba(35, 131, 226, 0.1);
+  /* Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Button styles */

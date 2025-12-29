@@ -3,6 +3,7 @@ import { Search, Grid, List, LogOut, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore } from '@/stores/drive.store';
 import { useAuthStore } from '@/stores/auth.store';
+import { Logo } from '@/components/Logo';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
@@ -20,12 +21,7 @@ export function Header({ onSearch }: HeaderProps) {
 
   return (
     <header className="h-12 border-b border-[var(--border-color)] flex items-center px-4 gap-4 bg-white">
-      <div className="flex items-center gap-2">
-        <div className="w-7 h-7 btn-primary rounded flex items-center justify-center">
-          <span className="text-white font-semibold text-sm">T</span>
-        </div>
-        <span className="font-medium">Telebox</span>
-      </div>
+      <Logo size="sm" linkTo="/drive" />
 
       <form onSubmit={handleSearch} className="flex-1 max-w-md mx-auto">
         <div className="relative">
@@ -56,8 +52,8 @@ export function Header({ onSearch }: HeaderProps) {
             onClick={() => setViewMode('grid')}
             className={cn(
               'p-1.5 rounded transition-colors',
-              viewMode === 'grid' 
-                ? 'bg-[var(--bg-active)] text-[var(--text-primary)]' 
+              viewMode === 'grid'
+                ? 'bg-[var(--bg-active)] text-[var(--text-primary)]'
                 : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)]'
             )}
           >
@@ -67,8 +63,8 @@ export function Header({ onSearch }: HeaderProps) {
             onClick={() => setViewMode('list')}
             className={cn(
               'p-1.5 rounded transition-colors',
-              viewMode === 'list' 
-                ? 'bg-[var(--bg-active)] text-[var(--text-primary)]' 
+              viewMode === 'list'
+                ? 'bg-[var(--bg-active)] text-[var(--text-primary)]'
                 : 'text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)]'
             )}
           >

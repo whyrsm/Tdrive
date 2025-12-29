@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/auth.store';
 import { ERROR_MESSAGES, mapErrorMessage } from '@/lib/constants';
 import { Alert } from '@/components/ui/Alert';
 
+import { Logo } from '@/components/Logo';
+
 type Step = 'phone' | 'code';
 
 export function LoginPage() {
@@ -50,7 +52,7 @@ export function LoginPage() {
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const backendMessage = axiosError.response?.data?.message;
-      
+
       // Check for network errors
       if (!axiosError.response) {
         setError(ERROR_MESSAGES.NETWORK_ERROR);
@@ -74,7 +76,7 @@ export function LoginPage() {
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const backendMessage = axiosError.response?.data?.message;
-      
+
       // Check for network errors
       if (!axiosError.response) {
         setError(ERROR_MESSAGES.NETWORK_ERROR);
@@ -90,12 +92,7 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-secondary)]">
       <div className="w-full max-w-sm mx-4">
         <div className="bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-9 h-9 bg-[var(--text-primary)] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">T</span>
-            </div>
-            <span className="font-medium text-lg text-[var(--text-primary)]">Telebox</span>
-          </div>
+          <Logo size="lg" className="justify-center mb-6" />
 
           <h1 className="text-base font-medium text-center mb-6 text-[var(--text-primary)]">
             {step === 'phone' ? 'Sign in with Telegram' : 'Enter verification code'}
@@ -129,9 +126,9 @@ export function LoginPage() {
               </div>
 
               {error && (
-                <Alert 
-                  variant="error" 
-                  message={error} 
+                <Alert
+                  variant="error"
+                  message={error}
                   onDismiss={() => setError('')}
                   className="mb-4"
                 />
@@ -189,9 +186,9 @@ export function LoginPage() {
               </div>
 
               {error && (
-                <Alert 
-                  variant="error" 
-                  message={error} 
+                <Alert
+                  variant="error"
+                  message={error}
                   onDismiss={() => setError('')}
                   className="mb-4"
                 />

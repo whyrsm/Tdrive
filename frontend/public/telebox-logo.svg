@@ -1,0 +1,11 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black rounded square background -->
+  <rect x="10" y="10" width="180" height="180" rx="45" fill="#000000"/>
+  
+  <!-- White cloud icon (Lucide Cloud path) -->
+  <g transform="translate(100, 100) scale(3.5)">
+    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" 
+          fill="#FFFFFF" 
+          transform="translate(-12, -12)"/>
+  </g>
+</svg>
