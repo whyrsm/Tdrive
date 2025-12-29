@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
+import { CryptoService } from '../common/services/crypto.service';
 import { MoveFileDto, BatchMoveFilesDto, RenameFileDto } from './dto/file.dto';
 import { File as PrismaFile } from '@prisma/client';
 
@@ -25,23 +26,44 @@ export class FilesService {
     private prisma: PrismaService,
     private telegramService: TelegramService,
     private authService: AuthService,
+    private cryptoService: CryptoService,
   ) {}
 
+  /**
+   * Gets the encryption key for a user by deriving it from their session string.
+   * This ensures each user has a unique key that the developer cannot access.
+   */
+  private async getUserKey(userId: string): Promise<Buffer> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+  }
+
+  private encryptName(name: string, userKey: Buffer): string {
+    return this.cryptoService.encryptMetadata(name, userKey);
+  }
+
+  private decryptName(encryptedName: string, userKey: Buffer): string {
+    return this.cryptoService.decryptMetadata(encryptedName, userKey);
+  }
+
   async findAll(userId: string, folderId?: string | null) {
+    const userKey = await this.getUserKey(userId);
     const files = await this.prisma.file.findMany({
       where: {
         userId,
         folderId: folderId === undefined ? undefined : folderId,
         deletedAt: null, // Exclude trashed files
       },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' }, // Sort by date since names are encrypted
     });
-    return files.map(this.serializeFile);
+    return files.map(f => this.serializeFileWithDecryption(f, userKey));
   }
 
   async findOne(id: string, userId: string) {
+    const userKey = await this.getUserKey(userId);
     const file = await this.findOneRaw(id, userId);
-    return this.serializeFile(file);
+    return this.serializeFileWithDecryption(file, userKey);
   }
 
   private async findOneRaw(id: string, userId: string) {
@@ -65,6 +87,7 @@ export class FilesService {
     file: Express.Multer.File,
     folderId?: string,
   ) {
+    const userKey = await this.getUserKey(userId);
     const client = await this.authService.getClientForUser(userId);
     
     try {
@@ -75,9 +98,12 @@ export class FilesService {
         file.mimetype,
       );
 
+      // Encrypt the filename before storing
+      const encryptedName = this.encryptName(file.originalname, userKey);
+
       const dbFile = await this.prisma.file.create({
         data: {
-          name: file.originalname,
+          name: encryptedName,
           size: BigInt(file.size),
           mimeType: file.mimetype,
           messageId: BigInt(message.id),
@@ -86,13 +112,14 @@ export class FilesService {
         },
       });
 
-      return this.serializeFile(dbFile);
+      return this.serializeFileWithDecryption(dbFile, userKey);
     } finally {
       await client.disconnect();
     }
   }
 
   async download(id: string, userId: string): Promise<{ buffer: Buffer; file: SerializedFile }> {
+    const userKey = await this.getUserKey(userId);
     const file = await this.findOneRaw(id, userId);
     const client = await this.authService.getClientForUser(userId);
     
@@ -101,19 +128,20 @@ export class FilesService {
         client,
         Number(file.messageId),
       );
-      return { buffer, file: this.serializeFile(file) };
+      return { buffer, file: this.serializeFileWithDecryption(file, userKey) };
     } finally {
       await client.disconnect();
     }
   }
 
   async move(id: string, userId: string, dto: MoveFileDto) {
+    const userKey = await this.getUserKey(userId);
     await this.findOneRaw(id, userId);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { folderId: dto.folderId || null },
     });
-    return this.serializeFile(updated);
+    return this.serializeFileWithDecryption(updated, userKey);
   }
 
   async batchMove(userId: string, dto: BatchMoveFilesDto) {
@@ -134,34 +162,40 @@ export class FilesService {
   }
 
   async rename(id: string, userId: string, dto: RenameFileDto) {
+    const userKey = await this.getUserKey(userId);
     await this.findOneRaw(id, userId);
+    // Encrypt the new name before storing
+    const encryptedName = this.encryptName(dto.name, userKey);
     const updated = await this.prisma.file.update({
       where: { id },
-      data: { name: dto.name },
+      data: { name: encryptedName },
     });
-    return this.serializeFile(updated);
+    return this.serializeFileWithDecryption(updated, userKey);
   }
 
   async remove(id: string, userId: string) {
+    const userKey = await this.getUserKey(userId);
     await this.findOneRaw(id, userId);
     // Soft delete - move to trash
     const updated = await this.prisma.file.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
-    return this.serializeFile(updated);
+    return this.serializeFileWithDecryption(updated, userKey);
   }
 
   // Trash methods
   async findTrashed(userId: string) {
+    const userKey = await this.getUserKey(userId);
     const files = await this.prisma.file.findMany({
       where: { userId, deletedAt: { not: null } },
       orderBy: { deletedAt: 'desc' },
     });
-    return files.map(this.serializeFile);
+    return files.map(f => this.serializeFileWithDecryption(f, userKey));
   }
 
   async restore(id: string, userId: string) {
+    const userKey = await this.getUserKey(userId);
     const file = await this.findOneRawIncludingTrashed(id, userId);
     if (!file.deletedAt) {
       throw new NotFoundException('File is not in trash');
@@ -170,7 +204,7 @@ export class FilesService {
       where: { id },
       data: { deletedAt: null },
     });
-    return this.serializeFile(updated);
+    return this.serializeFileWithDecryption(updated, userKey);
   }
 
   async permanentDelete(id: string, userId: string) {
@@ -221,37 +255,54 @@ export class FilesService {
   }
 
   async search(userId: string, query: string) {
+    // Since names are encrypted, we need to decrypt and filter client-side
+    const userKey = await this.getUserKey(userId);
     const files = await this.prisma.file.findMany({
       where: {
         userId,
         deletedAt: null,
-        name: { contains: query, mode: 'insensitive' },
       },
-      orderBy: { name: 'asc' },
     });
-    return files.map(this.serializeFile);
+    
+    // Decrypt names and filter by query
+    const lowerQuery = query.toLowerCase();
+    return files
+      .map(f => this.serializeFileWithDecryption(f, userKey))
+      .filter(f => f.name.toLowerCase().includes(lowerQuery))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async findFavorites(userId: string) {
+    const userKey = await this.getUserKey(userId);
     const files = await this.prisma.file.findMany({
       where: { userId, isFavorite: true, deletedAt: null },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
-    return files.map(this.serializeFile);
+    return files.map(f => this.serializeFileWithDecryption(f, userKey));
   }
 
   async toggleFavorite(id: string, userId: string) {
+    const userKey = await this.getUserKey(userId);
     const file = await this.findOneRaw(id, userId);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { isFavorite: !file.isFavorite },
     });
-    return this.serializeFile(updated);
+    return this.serializeFileWithDecryption(updated, userKey);
   }
 
   private serializeFile(file: PrismaFile): SerializedFile {
     return {
       ...file,
+      size: file.size.toString(),
+      messageId: file.messageId.toString(),
+    };
+  }
+
+  private serializeFileWithDecryption(file: PrismaFile, userKey: Buffer): SerializedFile {
+    return {
+      ...file,
+      name: this.decryptName(file.name, userKey),
       size: file.size.toString(),
       messageId: file.messageId.toString(),
     };

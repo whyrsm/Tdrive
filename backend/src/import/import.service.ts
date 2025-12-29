@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
+import { CryptoService } from '../common/services/crypto.service';
 import { Api } from 'telegram';
 import { ImportFilesDto, ImportSingleFileDto } from './dto/import.dto';
 
@@ -26,7 +27,25 @@ export class ImportService {
     private prisma: PrismaService,
     private telegramService: TelegramService,
     private authService: AuthService,
+    private cryptoService: CryptoService,
   ) {}
+
+  /**
+   * Gets the encryption key for a user by deriving it from their session string.
+   */
+  private async getUserKey(userId: string): Promise<Buffer> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+  }
+
+  private encryptName(name: string, userKey: Buffer): string {
+    return this.cryptoService.encryptMetadata(name, userKey);
+  }
+
+  private decryptName(encryptedName: string, userKey: Buffer): string {
+    return this.cryptoService.decryptMetadata(encryptedName, userKey);
+  }
 
   async getDialogs(userId: string): Promise<DialogInfo[]> {
     const client = await this.authService.getClientForUser(userId);
@@ -116,23 +135,27 @@ export class ImportService {
     console.log('Starting import for user:', userId);
     console.log('Import DTO:', dto);
     
+    const userKey = await this.getUserKey(userId);
     const client = await this.authService.getClientForUser(userId);
 
     try {
-      // 1. Create or get folder with chat name
-      let folder = await this.prisma.folder.findFirst({
-        where: {
-          userId,
-          name: dto.chatName,
-          parentId: null,
-        },
+      // 1. Create or get folder with chat name (encrypted)
+      const encryptedChatName = this.encryptName(dto.chatName, userKey);
+      
+      // Search for existing folder by decrypting all folder names
+      const existingFolders = await this.prisma.folder.findMany({
+        where: { userId, parentId: null },
       });
+      
+      let folder = existingFolders.find(f => 
+        this.decryptName(f.name, userKey) === dto.chatName
+      );
 
       if (!folder) {
         console.log('Creating folder:', dto.chatName);
         folder = await this.prisma.folder.create({
           data: {
-            name: dto.chatName,
+            name: encryptedChatName,
             userId,
           },
         });
@@ -150,7 +173,7 @@ export class ImportService {
       );
       console.log('Forwarded messages count:', forwardedMessages.length);
 
-      // 3. Create file records in database
+      // 3. Create file records in database with encrypted names
       const createdFiles = [];
       for (const message of forwardedMessages) {
         if (!message.media) {
@@ -165,9 +188,10 @@ export class ImportService {
         }
 
         console.log('Creating file record:', fileInfo.name);
+        const encryptedFileName = this.encryptName(fileInfo.name, userKey);
         const file = await this.prisma.file.create({
           data: {
-            name: fileInfo.name,
+            name: encryptedFileName,
             size: BigInt(fileInfo.size),
             mimeType: fileInfo.mimeType,
             messageId: BigInt(message.id),
@@ -178,6 +202,7 @@ export class ImportService {
 
         createdFiles.push({
           ...file,
+          name: fileInfo.name, // Return decrypted name
           size: file.size.toString(),
           messageId: file.messageId.toString(),
         });
@@ -188,7 +213,7 @@ export class ImportService {
       return {
         folder: {
           id: folder.id,
-          name: folder.name,
+          name: dto.chatName, // Return decrypted name
         },
         files: createdFiles,
         count: createdFiles.length,
@@ -202,22 +227,26 @@ export class ImportService {
   }
 
   async importSingleFile(userId: string, dto: ImportSingleFileDto) {
+    const userKey = await this.getUserKey(userId);
     const client = await this.authService.getClientForUser(userId);
 
     try {
-      // 1. Create or get folder with chat name
-      let folder = await this.prisma.folder.findFirst({
-        where: {
-          userId,
-          name: dto.chatName,
-          parentId: null,
-        },
+      // 1. Create or get folder with chat name (encrypted)
+      const encryptedChatName = this.encryptName(dto.chatName, userKey);
+      
+      // Search for existing folder by decrypting all folder names
+      const existingFolders = await this.prisma.folder.findMany({
+        where: { userId, parentId: null },
       });
+      
+      let folder = existingFolders.find(f => 
+        this.decryptName(f.name, userKey) === dto.chatName
+      );
 
       if (!folder) {
         folder = await this.prisma.folder.create({
           data: {
-            name: dto.chatName,
+            name: encryptedChatName,
             userId,
           },
         });
@@ -293,10 +322,11 @@ export class ImportService {
         throw new Error('Failed to extract file info from uploaded message');
       }
 
-      // 8. Create file record in database
+      // 8. Create file record in database with encrypted name
+      const encryptedFileName = this.encryptName(fileInfo.name, userKey);
       const file = await this.prisma.file.create({
         data: {
-          name: fileInfo.name,
+          name: encryptedFileName,
           size: BigInt(fileInfo.size),
           mimeType: fileInfo.mimeType,
           messageId: BigInt(result.id),
@@ -309,10 +339,11 @@ export class ImportService {
         success: true,
         folder: {
           id: folder.id,
-          name: folder.name,
+          name: dto.chatName, // Return decrypted name
         },
         file: {
           ...file,
+          name: fileInfo.name, // Return decrypted name
           size: file.size.toString(),
           messageId: file.messageId.toString(),
         },

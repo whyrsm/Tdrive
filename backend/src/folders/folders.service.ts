@@ -1,48 +1,96 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CryptoService } from '../common/services/crypto.service';
 import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto } from './dto/folder.dto';
 import { Folder as PrismaFolder } from '@prisma/client';
 
-export interface FolderWithChildren extends PrismaFolder {
+export interface SerializedFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  userId: string;
+  isFavorite: boolean;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FolderWithChildren extends SerializedFolder {
   children?: FolderWithChildren[];
 }
 
 @Injectable()
 export class FoldersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cryptoService: CryptoService,
+  ) {}
+
+  /**
+   * Gets the encryption key for a user by deriving it from their session string.
+   */
+  private async getUserKey(userId: string): Promise<Buffer> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+  }
+
+  private encryptName(name: string, userKey: Buffer): string {
+    return this.cryptoService.encryptMetadata(name, userKey);
+  }
+
+  private decryptName(encryptedName: string, userKey: Buffer): string {
+    return this.cryptoService.decryptMetadata(encryptedName, userKey);
+  }
+
+  private serializeFolder(folder: PrismaFolder, userKey: Buffer): SerializedFolder {
+    return {
+      ...folder,
+      name: this.decryptName(folder.name, userKey),
+    };
+  }
 
   async findAll(userId: string, parentId?: string | null) {
-    return this.prisma.folder.findMany({
+    const userKey = await this.getUserKey(userId);
+    const folders = await this.prisma.folder.findMany({
       where: {
         userId,
         parentId: parentId === undefined ? undefined : parentId,
         deletedAt: null,
       },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
+    return folders.map(f => this.serializeFolder(f, userKey));
   }
 
   async findOne(id: string, userId: string) {
+    const userKey = await this.getUserKey(userId);
     const folder = await this.prisma.folder.findFirst({
       where: { id, userId, deletedAt: null },
       include: { children: true, files: true },
     });
     if (!folder) throw new NotFoundException('Folder not found');
-    return folder;
+    
+    return {
+      ...this.serializeFolder(folder, userKey),
+      children: folder.children.map(c => this.serializeFolder(c, userKey)),
+      files: folder.files,
+    };
   }
 
   async findOneWithPath(id: string, userId: string) {
+    const userKey = await this.getUserKey(userId);
     const folder = await this.prisma.folder.findFirst({
       where: { id, userId, deletedAt: null },
     });
     if (!folder) throw new NotFoundException('Folder not found');
 
     // Build the path from root to this folder
-    const path: PrismaFolder[] = [];
+    const path: SerializedFolder[] = [];
     let currentFolder = folder;
     
     while (currentFolder) {
-      path.unshift(currentFolder);
+      path.unshift(this.serializeFolder(currentFolder, userKey));
       if (currentFolder.parentId) {
         const parent = await this.prisma.folder.findFirst({
           where: { id: currentFolder.parentId, userId, deletedAt: null },
@@ -57,7 +105,7 @@ export class FoldersService {
       }
     }
 
-    return { folder, path };
+    return { folder: this.serializeFolder(folder, userKey), path };
   }
 
   private async findOneIncludingTrashed(id: string, userId: string) {
@@ -68,33 +116,49 @@ export class FoldersService {
     return folder;
   }
 
+  private async findOneRaw(id: string, userId: string) {
+    const folder = await this.prisma.folder.findFirst({
+      where: { id, userId, deletedAt: null },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+    return folder;
+  }
+
   async create(userId: string, dto: CreateFolderDto) {
-    return this.prisma.folder.create({
+    const userKey = await this.getUserKey(userId);
+    const encryptedName = this.encryptName(dto.name, userKey);
+    const folder = await this.prisma.folder.create({
       data: {
-        name: dto.name,
+        name: encryptedName,
         parentId: dto.parentId || null,
         userId,
       },
     });
+    return this.serializeFolder(folder, userKey);
   }
 
   async update(id: string, userId: string, dto: UpdateFolderDto) {
-    await this.findOne(id, userId);
-    return this.prisma.folder.update({
+    const userKey = await this.getUserKey(userId);
+    await this.findOneRaw(id, userId);
+    const encryptedName = this.encryptName(dto.name, userKey);
+    const folder = await this.prisma.folder.update({
       where: { id },
-      data: { name: dto.name },
+      data: { name: encryptedName },
     });
+    return this.serializeFolder(folder, userKey);
   }
 
   async move(id: string, userId: string, dto: MoveFolderDto) {
-    await this.findOne(id, userId);
+    const userKey = await this.getUserKey(userId);
+    await this.findOneRaw(id, userId);
     if (dto.parentId) {
-      await this.findOne(dto.parentId, userId);
+      await this.findOneRaw(dto.parentId, userId);
     }
-    return this.prisma.folder.update({
+    const folder = await this.prisma.folder.update({
       where: { id },
       data: { parentId: dto.parentId || null },
     });
+    return this.serializeFolder(folder, userKey);
   }
 
   async batchMove(userId: string, dto: BatchMoveFoldersDto) {
@@ -108,7 +172,7 @@ export class FoldersService {
 
     // Verify target folder if specified
     if (dto.parentId) {
-      await this.findOne(dto.parentId, userId);
+      await this.findOneRaw(dto.parentId, userId);
       // Prevent moving folder into itself or its children
       if (dto.folderIds.includes(dto.parentId)) {
         throw new NotFoundException('Cannot move folder into itself');
@@ -124,7 +188,7 @@ export class FoldersService {
   }
 
   async remove(id: string, userId: string) {
-    await this.findOne(id, userId);
+    await this.findOneRaw(id, userId);
     // Soft delete - move to trash (also soft delete all files in folder)
     await this.prisma.$transaction([
       this.prisma.file.updateMany({
@@ -140,26 +204,31 @@ export class FoldersService {
   }
 
   async getFolderTree(userId: string): Promise<FolderWithChildren[]> {
+    const userKey = await this.getUserKey(userId);
     const folders = await this.prisma.folder.findMany({
       where: { userId, deletedAt: null },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
-    return this.buildTree(folders);
+    return this.buildTree(folders, userKey);
   }
 
   async findFavorites(userId: string) {
-    return this.prisma.folder.findMany({
+    const userKey = await this.getUserKey(userId);
+    const folders = await this.prisma.folder.findMany({
       where: { userId, isFavorite: true, deletedAt: null },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
+    return folders.map(f => this.serializeFolder(f, userKey));
   }
 
   // Trash methods
   async findTrashed(userId: string) {
-    return this.prisma.folder.findMany({
+    const userKey = await this.getUserKey(userId);
+    const folders = await this.prisma.folder.findMany({
       where: { userId, deletedAt: { not: null } },
       orderBy: { deletedAt: 'desc' },
     });
+    return folders.map(f => this.serializeFolder(f, userKey));
   }
 
   async restore(id: string, userId: string) {
@@ -192,22 +261,25 @@ export class FoldersService {
   }
 
   async toggleFavorite(id: string, userId: string) {
-    const folder = await this.findOne(id, userId);
-    return this.prisma.folder.update({
+    const userKey = await this.getUserKey(userId);
+    const folder = await this.findOneRaw(id, userId);
+    const updated = await this.prisma.folder.update({
       where: { id },
       data: { isFavorite: !folder.isFavorite },
     });
+    return this.serializeFolder(updated, userKey);
   }
 
   private buildTree(
     folders: PrismaFolder[],
+    userKey: Buffer,
     parentId: string | null = null,
   ): FolderWithChildren[] {
     return folders
       .filter((f) => f.parentId === parentId)
       .map((f) => ({
-        ...f,
-        children: this.buildTree(folders, f.id),
+        ...this.serializeFolder(f, userKey),
+        children: this.buildTree(folders, userKey, f.id),
       }));
   }
 }
