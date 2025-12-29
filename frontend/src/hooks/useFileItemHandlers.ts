@@ -69,15 +69,12 @@ export function useFileItemHandlers(
         return;
       }
 
-      // Single tap - select the item
+      // Single tap - toggle selection (allow multi-select on mobile)
       lastTapTimeRef.current = now;
       lastTapItemRef.current = item.id;
       
-      // Single tap replaces selection with this item
-      if (selectedItems.size !== 1 || !selectedItems.has(item.id)) {
-        clearSelection();
-        toggleSelect(item.id);
-      }
+      // Toggle selection instead of replacing
+      toggleSelect(item.id);
       lastClickedIndexRef.current = currentIndex;
       return;
     }
@@ -92,6 +89,7 @@ export function useFileItemHandlers(
 
     if (e.ctrlKey || e.metaKey) {
       // Ctrl/Cmd+click toggles selection
+      e.preventDefault();
       toggleSelect(item.id);
       lastClickedIndexRef.current = currentIndex;
       return;

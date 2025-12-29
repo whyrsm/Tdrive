@@ -21,3 +21,9 @@ export class RenameFileDto {
   @IsNotEmpty()
   name: string;
 }
+
+export class BatchDeleteFilesDto {
+  @IsArray()
+  @IsUUID('4', { each: true })
+  fileIds: string[];
+}

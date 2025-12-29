@@ -28,7 +28,13 @@ export function NewMenu({ onNewFolder, onUpload, onImport }: NewMenuProps) {
     };
   }, [isOpen]);
 
-  const menuItems = [
+  const menuItems: Array<{
+    icon: typeof FolderPlus;
+    label: string;
+    onClick: () => void;
+    disabled: boolean;
+    badge?: string;
+  }> = [
     { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder, disabled: false },
     { icon: Upload, label: 'File Upload', onClick: onUpload, disabled: false },
     { icon: Download, label: 'Import from Telegram', onClick: onImport || (() => {}), disabled: !onImport },

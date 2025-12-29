@@ -12,7 +12,7 @@ import {
 import { FoldersService } from './folders.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto } from './dto/folder.dto';
+import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto, BatchDeleteFoldersDto } from './dto/folder.dto';
 
 @Controller('folders')
 @UseGuards(JwtAuthGuard)
@@ -94,6 +94,14 @@ export class FoldersController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.foldersService.remove(id, user.sub);
+  }
+
+  @Delete('batch/delete')
+  batchDelete(
+    @Body() dto: BatchDeleteFoldersDto,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.foldersService.batchDelete(user.sub, dto);
   }
 
   @Patch(':id/restore')

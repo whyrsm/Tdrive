@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptoService } from '../common/services/crypto.service';
-import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto } from './dto/folder.dto';
+import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto, BatchDeleteFoldersDto } from './dto/folder.dto';
 import { Folder as PrismaFolder } from '@prisma/client';
 
 export interface SerializedFolder {
@@ -201,6 +201,30 @@ export class FoldersService {
       }),
     ]);
     return { success: true };
+  }
+
+  async batchDelete(userId: string, dto: BatchDeleteFoldersDto) {
+    // Verify all folders belong to user and are not already deleted
+    const folders = await this.prisma.folder.findMany({
+      where: { id: { in: dto.folderIds }, userId, deletedAt: null },
+    });
+    if (folders.length !== dto.folderIds.length) {
+      throw new NotFoundException('One or more folders not found');
+    }
+
+    // Soft delete - move to trash (also soft delete all files in these folders)
+    await this.prisma.$transaction([
+      this.prisma.file.updateMany({
+        where: { folderId: { in: dto.folderIds }, userId },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.folder.updateMany({
+        where: { id: { in: dto.folderIds }, userId },
+        data: { deletedAt: new Date() },
+      }),
+    ]);
+
+    return { count: dto.folderIds.length };
   }
 
   async getFolderTree(userId: string): Promise<FolderWithChildren[]> {

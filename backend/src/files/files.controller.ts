@@ -17,7 +17,7 @@ import { Response } from 'express';
 import { FilesService } from './files.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { MoveFileDto, BatchMoveFilesDto, RenameFileDto } from './dto/file.dto';
+import { MoveFileDto, BatchMoveFilesDto, RenameFileDto, BatchDeleteFilesDto } from './dto/file.dto';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard)
@@ -117,6 +117,14 @@ export class FilesController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.filesService.remove(id, user.sub);
+  }
+
+  @Delete('batch/delete')
+  batchDelete(
+    @Body() dto: BatchDeleteFilesDto,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.filesService.batchDelete(user.sub, dto);
   }
 
   @Patch(':id/restore')

@@ -95,6 +95,20 @@ export function useDeleteFolder() {
   });
 }
 
+export function useBatchDeleteFolders() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ folderIds }: { folderIds: string[]; parentId?: string | null }) => 
+      foldersApi.batchDelete(folderIds),
+    onSuccess: (_, { parentId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.trash() });
+    },
+  });
+}
+
 export function useFavoriteFolders() {
   return useQuery({
     queryKey: queryKeys.folders.favorites(),

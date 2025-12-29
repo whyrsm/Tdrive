@@ -111,6 +111,19 @@ export function useDeleteFile() {
   });
 }
 
+export function useBatchDeleteFiles() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ fileIds }: { fileIds: string[]; folderId?: string | null }) => 
+      filesApi.batchDelete(fileIds),
+    onSuccess: (_, { folderId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.trash() });
+    },
+  });
+}
+
 export function useFavoriteFiles() {
   return useQuery({
     queryKey: queryKeys.files.favorites(),

@@ -5,8 +5,10 @@ import {
   useCreateFolder,
   useUpdateFolder,
   useDeleteFolder,
+  useBatchDeleteFolders,
   useRenameFile,
   useDeleteFile,
+  useBatchDeleteFiles,
   useToggleFileFavorite,
   useToggleFolderFavorite,
 } from '@/lib/queries';
@@ -34,13 +36,22 @@ export function useDriveActions(currentFolderId: string | null) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameItem, setRenameItem] = useState<RenameItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<{ id: string; name: string; type: 'file' | 'folder' } | null>(null);
+  const [deleteItems, setDeleteItems] = useState<{ 
+    ids: string[]; 
+    count: number; 
+    type: 'mixed' | 'file' | 'folder';
+    fileIds?: string[];
+    folderIds?: string[];
+  } | null>(null);
 
   const downloadFile = useDownloadFile();
   const createFolder = useCreateFolder();
   const updateFolder = useUpdateFolder();
   const deleteFolder = useDeleteFolder();
+  const batchDeleteFolders = useBatchDeleteFolders();
   const renameFile = useRenameFile();
   const deleteFile = useDeleteFile();
+  const batchDeleteFiles = useBatchDeleteFiles();
   const toggleFileFavorite = useToggleFileFavorite();
   const toggleFolderFavorite = useToggleFolderFavorite();
 
@@ -82,18 +93,63 @@ export function useDriveActions(currentFolderId: string | null) {
   };
 
   const handleDelete = () => {
-    if (!deleteItem) return;
-    if (deleteItem.type === 'folder') {
-      deleteFolder.mutate({ id: deleteItem.id, parentId: currentFolderId });
-    } else {
-      deleteFile.mutate({ id: deleteItem.id, folderId: currentFolderId });
+    if (deleteItem) {
+      // Single item delete
+      if (deleteItem.type === 'folder') {
+        deleteFolder.mutate({ id: deleteItem.id, parentId: currentFolderId });
+      } else {
+        deleteFile.mutate({ id: deleteItem.id, folderId: currentFolderId });
+      }
+      setDeleteItem(null);
+    } else if (deleteItems) {
+      // Bulk delete
+      if (deleteItems.type === 'folder' && deleteItems.folderIds) {
+        batchDeleteFolders.mutate({ folderIds: deleteItems.folderIds, parentId: currentFolderId });
+      } else if (deleteItems.type === 'file' && deleteItems.fileIds) {
+        batchDeleteFiles.mutate({ fileIds: deleteItems.fileIds, folderId: currentFolderId });
+      } else if (deleteItems.type === 'mixed') {
+        // Mixed - delete both files and folders
+        if (deleteItems.fileIds && deleteItems.fileIds.length > 0) {
+          batchDeleteFiles.mutate({ fileIds: deleteItems.fileIds, folderId: currentFolderId });
+        }
+        if (deleteItems.folderIds && deleteItems.folderIds.length > 0) {
+          batchDeleteFolders.mutate({ folderIds: deleteItems.folderIds, parentId: currentFolderId });
+        }
+      }
+      setDeleteItems(null);
     }
-    setDeleteItem(null);
   };
 
   const closeDeleteConfirm = () => {
     setShowDeleteConfirm(false);
     setDeleteItem(null);
+    setDeleteItems(null);
+  };
+
+  // Bulk delete for selected items
+  const openBulkDeleteConfirm = (items: Array<FileItem | FolderItem>, types: Array<'file' | 'folder'>) => {
+    const fileIds: string[] = [];
+    const folderIds: string[] = [];
+    
+    items.forEach((item, index) => {
+      if (types[index] === 'file') {
+        fileIds.push(item.id);
+      } else {
+        folderIds.push(item.id);
+      }
+    });
+    
+    const fileCount = fileIds.length;
+    const folderCount = folderIds.length;
+    
+    let type: 'mixed' | 'file' | 'folder' = 'mixed';
+    if (fileCount > 0 && folderCount === 0) type = 'file';
+    else if (folderCount > 0 && fileCount === 0) type = 'folder';
+    
+    // Store both file and folder IDs together, we'll separate them in handleDelete
+    const allIds = [...fileIds, ...folderIds];
+    setDeleteItems({ ids: allIds, count: allIds.length, type, fileIds, folderIds });
+    setShowDeleteConfirm(true);
   };
 
   const handleFileOpen = (file: FileItem) => {
@@ -239,6 +295,7 @@ function getMimeTypeFromFilename(filename: string): string | null {
     contextMenu,
     renameItem,
     deleteItem,
+    deleteItems,
     // Setters
     setShowUpload,
     setShowNewFolder,
@@ -255,6 +312,7 @@ function getMimeTypeFromFilename(filename: string): string | null {
     closeRenameModal,
     openDeleteConfirm,
     openDeleteConfirmDirect,
+    openBulkDeleteConfirm,
     closeDeleteConfirm,
     closePreview,
     handleToggleFavorite,

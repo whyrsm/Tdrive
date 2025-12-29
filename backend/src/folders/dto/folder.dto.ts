@@ -31,3 +31,9 @@ export class BatchMoveFoldersDto {
   @IsOptional()
   parentId?: string | null;
 }
+
+export class BatchDeleteFoldersDto {
+  @IsArray()
+  @IsUUID('4', { each: true })
+  folderIds: string[];
+}

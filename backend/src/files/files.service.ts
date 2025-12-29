@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
 import { CryptoService } from '../common/services/crypto.service';
-import { MoveFileDto, BatchMoveFilesDto, RenameFileDto } from './dto/file.dto';
+import { MoveFileDto, BatchMoveFilesDto, RenameFileDto, BatchDeleteFilesDto } from './dto/file.dto';
 import { File as PrismaFile } from '@prisma/client';
 
 export interface SerializedFile {
@@ -182,6 +182,25 @@ export class FilesService {
       data: { deletedAt: new Date() },
     });
     return this.serializeFileWithDecryption(updated, userKey);
+  }
+
+  async batchDelete(userId: string, dto: BatchDeleteFilesDto) {
+    const userKey = await this.getUserKey(userId);
+    // Verify all files belong to user and are not already deleted
+    const files = await this.prisma.file.findMany({
+      where: { id: { in: dto.fileIds }, userId, deletedAt: null },
+    });
+    if (files.length !== dto.fileIds.length) {
+      throw new NotFoundException('One or more files not found');
+    }
+
+    // Soft delete - move to trash
+    await this.prisma.file.updateMany({
+      where: { id: { in: dto.fileIds }, userId },
+      data: { deletedAt: new Date() },
+    });
+
+    return { count: dto.fileIds.length };
   }
 
   // Trash methods

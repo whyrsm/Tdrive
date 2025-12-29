@@ -61,6 +61,7 @@ export const foldersApi = {
   batchMove: (folderIds: string[], parentId?: string | null) => api.patch('/folders/batch/move', { folderIds, parentId }),
   toggleFavorite: (id: string) => api.patch(`/folders/${id}/favorite`),
   delete: (id: string) => api.delete(`/folders/${id}`),
+  batchDelete: (folderIds: string[]) => api.delete('/folders/batch/delete', { data: { folderIds } }),
   restore: (id: string) => api.patch(`/folders/${id}/restore`),
   permanentDelete: (id: string) => api.delete(`/folders/${id}/permanent`),
 };
@@ -91,6 +92,7 @@ export const filesApi = {
   rename: (id: string, name: string) => api.patch(`/files/${id}/rename`, { name }),
   toggleFavorite: (id: string) => api.patch(`/files/${id}/favorite`),
   delete: (id: string) => api.delete(`/files/${id}`),
+  batchDelete: (fileIds: string[]) => api.delete('/files/batch/delete', { data: { fileIds } }),
   restore: (id: string) => api.patch(`/files/${id}/restore`),
   permanentDelete: (id: string) => api.delete(`/files/${id}/permanent`),
   emptyTrash: () => api.delete('/files/trash/empty'),

@@ -22,11 +22,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { useParams, useNavigate } from 'react-router-dom';
 import { foldersApi } from '@/lib/api';
+import { Trash2 } from 'lucide-react';
 
 export function DrivePage() {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
-  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView, setCurrentFolder, sortField, sortDirection } = useDriveStore();
+  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView, setCurrentFolder, sortField, sortDirection, selectedItems, clearSelection } = useDriveStore();
   const [showImport, setShowImport] = useState(false);
   const [backgroundContextMenu, setBackgroundContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -65,6 +66,7 @@ export function DrivePage() {
     contextMenu,
     renameItem,
     deleteItem,
+    deleteItems,
     setShowUpload,
     setShowNewFolder,
     setContextMenu,
@@ -79,6 +81,7 @@ export function DrivePage() {
     closeRenameModal,
     openDeleteConfirm,
     openDeleteConfirmDirect,
+    openBulkDeleteConfirm,
     closeDeleteConfirm,
     closePreview,
     handleToggleFavorite,
@@ -144,6 +147,29 @@ export function DrivePage() {
     setBackgroundContextMenu({ x: e.clientX, y: e.clientY });
   };
 
+  const handleBulkDelete = () => {
+    const items: Array<FileItem | FolderItem> = [];
+    const types: Array<'file' | 'folder'> = [];
+    
+    selectedItems.forEach(id => {
+      const file = sortedFiles.find(f => f.id === id);
+      const folder = sortedFolders.find(f => f.id === id);
+      
+      if (file) {
+        items.push(file);
+        types.push('file');
+      } else if (folder) {
+        items.push(folder);
+        types.push('folder');
+      }
+    });
+    
+    if (items.length > 0) {
+      openBulkDeleteConfirm(items, types);
+      clearSelection();
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col">
       <Header onSearch={handleSearch} />
@@ -159,6 +185,21 @@ export function DrivePage() {
 
         <main className="flex-1 flex flex-col overflow-hidden">
           <Breadcrumb />
+
+          {selectedItems.size > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-secondary)] border-b border-[var(--border-color)]">
+              <span className="text-sm text-[var(--text-secondary)]">
+                {selectedItems.size} item{selectedItems.size > 1 ? 's' : ''} selected
+              </span>
+              <button
+                onClick={handleBulkDelete}
+                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#dc2626] hover:bg-[var(--bg-hover)] rounded transition-colors"
+              >
+                <Trash2 size={14} />
+                Delete
+              </button>
+            </div>
+          )}
 
           <div className="flex-1 overflow-auto" onContextMenu={handleBackgroundContextMenu}>
             {currentView === 'trash' ? (
@@ -250,8 +291,10 @@ export function DrivePage() {
 
       <DeleteConfirmModal
         isOpen={showDeleteConfirm}
-        itemName={deleteItem?.name || ''}
-        itemType={deleteItem?.type || 'file'}
+        itemName={deleteItem?.name}
+        itemType={deleteItem?.type}
+        itemCount={deleteItems?.count}
+        bulkType={deleteItems?.type}
         onClose={closeDeleteConfirm}
         onConfirm={handleDelete}
       />
