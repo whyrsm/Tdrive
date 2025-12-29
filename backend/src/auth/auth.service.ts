@@ -71,7 +71,25 @@ export class AuthService {
 
       const accessToken = this.jwtService.sign({ sub: dbUser.id });
       return { accessToken };
-    } catch (error) {
+    } catch (error: any) {
+      // Map Telegram API errors to user-friendly messages
+      const errorMessage = error.errorMessage || error.message || 'Unknown error';
+      
+      if (errorMessage === 'PHONE_CODE_INVALID') {
+        throw new UnauthorizedException('Invalid verification code. Please check and try again');
+      }
+      if (errorMessage === 'PHONE_CODE_EXPIRED') {
+        this.pendingAuths.delete(tempToken);
+        throw new UnauthorizedException('Verification code has expired. Please request a new code');
+      }
+      if (errorMessage === 'PHONE_CODE_EMPTY') {
+        throw new UnauthorizedException('Please enter the verification code');
+      }
+      if (errorMessage === 'SESSION_PASSWORD_NEEDED') {
+        throw new UnauthorizedException('Two-factor authentication is enabled. Please disable it in Telegram settings and try again');
+      }
+      
+      console.error('Telegram signIn error:', error);
       throw new UnauthorizedException('Invalid verification code');
     }
   }

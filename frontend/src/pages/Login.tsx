@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { cn } from '@/lib/utils';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
@@ -16,13 +18,29 @@ export function LoginPage() {
   const [tempToken, setTempToken] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
 
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
 
+  // Validate phone number format
+  const validatePhone = (phoneNumber: string): boolean => {
+    // Must start with + and have at least 10 digits
+    const phoneRegex = /^\+\d{10,15}$/;
+    return phoneRegex.test(phoneNumber);
+  };
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setPhoneError('');
+
+    // Validate phone format before sending
+    if (!validatePhone(phone)) {
+      setPhoneError(ERROR_MESSAGES.INVALID_PHONE);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -89,19 +107,25 @@ export function LoginPage() {
                 <label className="block text-sm text-[var(--text-secondary)] mb-1.5">
                   Phone number
                 </label>
-                <input
-                  type="tel"
+                <PhoneInput
+                  defaultCountry="us"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1234567890"
-                  className={cn(
-                    'w-full px-3 py-2 rounded',
-                    'border border-[var(--border-color)]',
-                    'focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25',
-                    'text-sm placeholder:text-[var(--text-placeholder)]',
-                    'transition-shadow'
+                  onChange={(phone) => {
+                    setPhone(phone);
+                    setPhoneError('');
+                  }}
+                  inputClassName={cn(
+                    phoneError && 'border-red-500'
                   )}
+                  className="phone-input-custom"
+                  autoFocus
                 />
+                {phoneError && (
+                  <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                )}
+                <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                  Select your country and enter your phone number
+                </p>
               </div>
 
               {error && (
@@ -115,7 +139,7 @@ export function LoginPage() {
 
               <button
                 type="submit"
-                disabled={!phone || isLoading}
+                disabled={!phone || isLoading || !validatePhone(phone)}
                 className={cn(
                   'w-full py-2 rounded btn-primary',
                   'text-white font-medium text-sm',
@@ -138,9 +162,18 @@ export function LoginPage() {
                 </label>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  onChange={(e) => {
+                    // Only allow digits
+                    const value = e.target.value.replace(/\D/g, '');
+                    setCode(value);
+                    setError('');
+                  }}
                   placeholder="12345"
+                  maxLength={5}
+                  autoComplete="one-time-code"
                   autoFocus
                   className={cn(
                     'w-full px-3 py-2 rounded text-center text-lg tracking-widest',
@@ -150,6 +183,9 @@ export function LoginPage() {
                     'transition-shadow'
                   )}
                 />
+                <p className="text-xs text-[var(--text-tertiary)] mt-1 text-center">
+                  Check your Telegram app for the code
+                </p>
               </div>
 
               {error && (
@@ -174,17 +210,41 @@ export function LoginPage() {
                 {isLoading ? 'Verifying...' : 'Verify'}
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setStep('phone');
-                  setCode('');
-                  setError('');
-                }}
-                className="w-full mt-2 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                Use different number
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('phone');
+                    setCode('');
+                    setError('');
+                  }}
+                  className="flex-1 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                >
+                  Change number
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setError('');
+                    setIsLoading(true);
+                    try {
+                      const { data } = await authApi.sendCode(phone);
+                      setTempToken(data.tempToken);
+                      setCode('');
+                    } catch (error) {
+                      const axiosError = error as AxiosError<{ message: string }>;
+                      const backendMessage = axiosError.response?.data?.message;
+                      setError(mapErrorMessage(backendMessage) || ERROR_MESSAGES.SEND_CODE_FAILED);
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  disabled={isLoading}
+                  className="flex-1 py-2 text-sm text-[var(--accent)] hover:text-[var(--accent)]/80 disabled:opacity-40 transition-colors"
+                >
+                  Resend code
+                </button>
+              </div>
             </form>
           )}
         </div>

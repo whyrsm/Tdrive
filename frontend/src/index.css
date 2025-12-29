@@ -131,3 +131,79 @@ input {
 .animate-success-flash {
   animation: successFlash 0.6s ease-out;
 }
+
+/* Phone input custom styles */
+.phone-input-custom {
+  width: 100%;
+}
+
+.phone-input-custom .react-international-phone-input-container {
+  width: 100%;
+}
+
+.phone-input-custom .react-international-phone-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.phone-input-custom .react-international-phone-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.25);
+}
+
+.phone-input-custom .react-international-phone-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.phone-input-custom .react-international-phone-country-selector-button {
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  background-color: var(--bg-primary);
+  transition: background-color 0.15s;
+}
+
+.phone-input-custom .react-international-phone-country-selector-button:hover {
+  background-color: var(--bg-hover);
+}
+
+.phone-input-custom .react-international-phone-country-selector-button:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.25);
+}
+
+.phone-input-custom .react-international-phone-country-selector-dropdown {
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background-color: var(--bg-primary);
+  box-shadow: 0 3px 6px rgba(15, 15, 15, 0.1), 0 9px 24px rgba(15, 15, 15, 0.2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.phone-input-custom .react-international-phone-country-selector-dropdown__list-item {
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: background-color 0.15s;
+}
+
+.phone-input-custom .react-international-phone-country-selector-dropdown__list-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.phone-input-custom .react-international-phone-country-selector-dropdown__list-item--selected {
+  background-color: var(--selected-bg);
+}
+
+.phone-input-custom .react-international-phone-country-selector-dropdown__list-item--focused {
+  background-color: var(--bg-hover);
+}

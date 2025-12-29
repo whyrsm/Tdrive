@@ -29,8 +29,10 @@ export const ERROR_MESSAGES = {
   INVALID_CODE: 'The verification code is incorrect. Please check and try again.',
   CODE_EXPIRED: 'Your verification session has expired. Please request a new code.',
   SEND_CODE_FAILED: 'Unable to send verification code. Please check your phone number and try again.',
-  INVALID_PHONE: 'Please enter a valid phone number with country code (e.g., +621234567).',
+  INVALID_PHONE: 'Please enter a valid phone number with country code (e.g., +1234567890).',
   PHONE_FLOOD: 'Too many attempts. Please wait a few minutes before trying again.',
+  TWO_FACTOR_AUTH: 'Two-factor authentication is enabled. Please disable it in Telegram settings and try again.',
+  PHONE_BANNED: 'This phone number has been banned from Telegram.',
   
   // File errors
   FILE_NOT_FOUND: 'File not found',
@@ -48,14 +50,23 @@ export const mapErrorMessage = (backendMessage?: string): string => {
   if (message.includes('invalid or expired verification')) {
     return ERROR_MESSAGES.CODE_EXPIRED;
   }
-  if (message.includes('invalid verification code')) {
+  if (message.includes('invalid verification code') || message.includes('phone_code_invalid')) {
     return ERROR_MESSAGES.INVALID_CODE;
+  }
+  if (message.includes('code has expired') || message.includes('phone_code_expired')) {
+    return ERROR_MESSAGES.CODE_EXPIRED;
   }
   if (message.includes('phone_number_invalid') || message.includes('invalid phone')) {
     return ERROR_MESSAGES.INVALID_PHONE;
   }
   if (message.includes('flood') || message.includes('too many')) {
     return ERROR_MESSAGES.PHONE_FLOOD;
+  }
+  if (message.includes('two-factor') || message.includes('session_password_needed')) {
+    return ERROR_MESSAGES.TWO_FACTOR_AUTH;
+  }
+  if (message.includes('banned') || message.includes('phone_number_banned')) {
+    return ERROR_MESSAGES.PHONE_BANNED;
   }
   if (message.includes('network') || message.includes('econnrefused')) {
     return ERROR_MESSAGES.NETWORK_ERROR;
