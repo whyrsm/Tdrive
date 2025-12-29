@@ -16,15 +16,43 @@ import { MobileFAB } from '@/components/layout/MobileFAB';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch, useFavoriteFiles, useFavoriteFolders } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
+import { useParams, useNavigate } from 'react-router-dom';
+import { foldersApi } from '@/lib/api';
 
 export function DrivePage() {
-  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView } = useDriveStore();
+  const { folderId } = useParams<{ folderId: string }>();
+  const navigate = useNavigate();
+  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView, setCurrentFolder } = useDriveStore();
   const [showImport, setShowImport] = useState(false);
   const [backgroundContextMenu, setBackgroundContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
+
+  // Sync URL params with store on mount and URL changes
+  useEffect(() => {
+    const syncFolderFromUrl = async () => {
+      if (folderId) {
+        // URL has a folder ID - load folder with path
+        try {
+          const response = await foldersApi.getWithPath(folderId);
+          const { path } = response.data;
+          setCurrentFolder(folderId, path);
+        } catch {
+          // Folder not found, redirect to root
+          navigate('/drive', { replace: true });
+        }
+      } else {
+        // No folder ID in URL - go to root
+        setCurrentFolder(null, []);
+      }
+      setIsInitialized(true);
+    };
+
+    syncFolderFromUrl();
+  }, [folderId, setCurrentFolder, navigate]);
 
   const {
     showUpload,
@@ -62,9 +90,9 @@ export function DrivePage() {
   const { data: favoriteFiles = [], isLoading: favFilesLoading } = useFavoriteFiles();
   const { data: favoriteFolders = [], isLoading: favFoldersLoading } = useFavoriteFolders();
 
-  const isLoading = currentView === 'favorites' 
+  const isLoading = !isInitialized || (currentView === 'favorites' 
     ? favFilesLoading || favFoldersLoading 
-    : foldersLoading || filesLoading;
+    : foldersLoading || filesLoading);
   
   const displayFiles = currentView === 'favorites' 
     ? favoriteFiles 
@@ -75,7 +103,8 @@ export function DrivePage() {
 
   const handleFolderOpen = useCallback((folder: FolderItem) => {
     addToPath(folder);
-  }, [addToPath]);
+    navigate(`/drive/folder/${folder.id}`);
+  }, [addToPath, navigate]);
 
   // Debounce search to reduce API calls
   const debouncedSetSearchQuery = useDebouncedCallback(

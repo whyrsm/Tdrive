@@ -54,6 +54,7 @@ export const foldersApi = {
   favorites: () => api.get('/folders/favorites'),
   trash: () => api.get('/folders/trash'),
   get: (id: string) => api.get(`/folders/${id}`),
+  getWithPath: (id: string) => api.get(`/folders/${id}/path`),
   create: (name: string, parentId?: string) => api.post('/folders', { name, parentId }),
   update: (id: string, name: string) => api.patch(`/folders/${id}`, { name }),
   move: (id: string, parentId?: string | null) => api.patch(`/folders/${id}/move`, { parentId }),

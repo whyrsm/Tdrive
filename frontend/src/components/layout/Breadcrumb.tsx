@@ -1,11 +1,13 @@
 import { ChevronRight, Home, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useDriveStore } from '@/stores/drive.store';
 
 export function Breadcrumb() {
   const { folderPath, navigateToPathIndex } = useDriveStore();
   const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
 
   // On mobile, show collapsed breadcrumb if path is long
   const maxVisibleItems = 2;
@@ -13,10 +15,22 @@ export function Breadcrumb() {
   const collapsedItems = shouldCollapse ? folderPath.slice(0, -maxVisibleItems) : [];
   const visibleItems = shouldCollapse ? folderPath.slice(-maxVisibleItems) : folderPath;
 
+  const handleNavigate = (index: number) => {
+    navigateToPathIndex(index);
+    if (index < 0) {
+      navigate('/drive');
+    } else {
+      const targetFolder = folderPath[index];
+      if (targetFolder) {
+        navigate(`/drive/folder/${targetFolder.id}`);
+      }
+    }
+  };
+
   return (
     <div className="flex items-center gap-1 px-2 sm:px-4 py-2 text-sm border-b border-[var(--border-color)] bg-white overflow-x-auto">
       <button
-        onClick={() => navigateToPathIndex(-1)}
+        onClick={() => handleNavigate(-1)}
         className="flex items-center gap-1 px-2 py-1 rounded hover:bg-[var(--bg-hover)] flex-shrink-0"
       >
         <Home size={14} />
@@ -45,7 +59,7 @@ export function Breadcrumb() {
                     <button
                       key={folder.id}
                       onClick={() => {
-                        navigateToPathIndex(index);
+                        handleNavigate(index);
                         setShowDropdown(false);
                       }}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--bg-hover)] truncate"
@@ -66,7 +80,7 @@ export function Breadcrumb() {
           <div key={folder.id} className="flex items-center flex-shrink-0">
             <ChevronRight size={14} className="text-[var(--text-secondary)]" />
             <button
-              onClick={() => navigateToPathIndex(actualIndex)}
+              onClick={() => handleNavigate(actualIndex)}
               className={cn(
                 'px-2 py-1 rounded hover:bg-[var(--bg-hover)] truncate max-w-[120px] sm:max-w-[200px]',
                 actualIndex === folderPath.length - 1 && 'font-medium'

@@ -47,6 +47,11 @@ export class FoldersController {
     return this.foldersService.findOne(id, user.sub);
   }
 
+  @Get(':id/path')
+  findOneWithPath(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
+    return this.foldersService.findOneWithPath(id, user.sub);
+  }
+
   @Post()
   create(@Body() dto: CreateFolderDto, @CurrentUser() user: { sub: string }) {
     return this.foldersService.create(user.sub, dto);

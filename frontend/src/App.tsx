@@ -51,6 +51,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/drive/folder/:folderId"
+        element={
+          <ProtectedRoute>
+            <DrivePage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

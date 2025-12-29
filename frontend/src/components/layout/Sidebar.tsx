@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star, Trash2, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
 import { useFolderTree, useFavoriteFolders, useFavoriteFiles, useTrashedFiles, useTrashedFolders } from '@/lib/queries';
@@ -94,6 +95,7 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
   const { data: trashedFiles = [] } = useTrashedFiles();
   const { data: trashedFolders = [] } = useTrashedFolders();
   const [contextMenu, setContextMenu] = useState<SidebarContextMenu | null>(null);
+  const navigate = useNavigate();
 
   const hasFavorites = favoriteFolders.length > 0 || favoriteFiles.length > 0;
   const hasTrash = trashedFiles.length > 0 || trashedFolders.length > 0;
@@ -118,11 +120,13 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
 
   const handleSelectFolder = (folder: FolderItem, path: FolderItem[]) => {
     setCurrentFolder(folder.id, path);
+    navigate(`/drive/folder/${folder.id}`);
     closeSidebarOnMobile();
   };
 
   const handleGoToRoot = () => {
     setCurrentFolder(null, []);
+    navigate('/drive');
     closeSidebarOnMobile();
   };
 

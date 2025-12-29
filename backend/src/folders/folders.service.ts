@@ -31,6 +31,35 @@ export class FoldersService {
     return folder;
   }
 
+  async findOneWithPath(id: string, userId: string) {
+    const folder = await this.prisma.folder.findFirst({
+      where: { id, userId, deletedAt: null },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+
+    // Build the path from root to this folder
+    const path: PrismaFolder[] = [];
+    let currentFolder = folder;
+    
+    while (currentFolder) {
+      path.unshift(currentFolder);
+      if (currentFolder.parentId) {
+        const parent = await this.prisma.folder.findFirst({
+          where: { id: currentFolder.parentId, userId, deletedAt: null },
+        });
+        if (parent) {
+          currentFolder = parent;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    return { folder, path };
+  }
+
   private async findOneIncludingTrashed(id: string, userId: string) {
     const folder = await this.prisma.folder.findFirst({
       where: { id, userId },
