@@ -1,10 +1,10 @@
-# TDrive
+# Telebox
 
 A Google Drive-like web application that uses Telegram as the storage backend. Users authenticate with their Telegram account and manage files stored in their Telegram "Saved Messages".
 
 ## Overview
 
-TDrive provides a familiar file manager interface while leveraging Telegram's unlimited cloud storage. Each user's files remain in their own Telegram account, ensuring privacy and eliminating storage costs.
+Telebox provides a familiar file manager interface while leveraging Telegram's unlimited cloud storage. Each user's files remain in their own Telegram account, ensuring privacy and eliminating storage costs.
 
 ## Architecture
 

@@ -21,7 +21,7 @@ async function bootstrap() {
   
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`TDrive API running on http://localhost:${port}`);
+  console.log(`Telebox API running on http://localhost:${port}`);
 }
 
 bootstrap();

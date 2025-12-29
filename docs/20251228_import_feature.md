@@ -2,7 +2,7 @@
 
 ## Overview
 
-The import feature allows users to import files from their Telegram chats into TDrive. Files are copied to Saved Messages and organized into folders named after the source chat.
+The import feature allows users to import files from their Telegram chats into Telebox. Files are copied to Saved Messages and organized into folders named after the source chat.
 
 ## User Flow
 

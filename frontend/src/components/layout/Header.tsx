@@ -24,7 +24,7 @@ export function Header({ onSearch }: HeaderProps) {
         <div className="w-7 h-7 btn-primary rounded flex items-center justify-center">
           <span className="text-white font-semibold text-sm">T</span>
         </div>
-        <span className="font-medium">TDrive</span>
+        <span className="font-medium">Telebox</span>
       </div>
 
       <form onSubmit={handleSearch} className="flex-1 max-w-md mx-auto">
