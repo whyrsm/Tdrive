@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Plus, FolderPlus, Upload, X } from 'lucide-react';
+import { Plus, FolderPlus, Upload, Download, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MobileFABProps {
   onNewFolder: () => void;
   onUpload: () => void;
+  onImport?: () => void;
 }
 
-export function MobileFAB({ onNewFolder, onUpload }: MobileFABProps) {
+export function MobileFAB({ onNewFolder, onUpload, onImport }: MobileFABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleAction = (action: () => void) => {
@@ -38,6 +39,15 @@ export function MobileFAB({ onNewFolder, onUpload }: MobileFABProps) {
           <Upload size={18} className="text-[var(--text-secondary)]" />
           Upload
         </button>
+        {onImport && (
+          <button
+            onClick={() => handleAction(onImport)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-[var(--text-primary)] active:bg-[var(--bg-hover)]"
+          >
+            <Download size={18} className="text-[var(--text-secondary)]" />
+            Import
+          </button>
+        )}
       </div>
 
       {/* Main FAB button */}

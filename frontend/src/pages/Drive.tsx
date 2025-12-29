@@ -141,6 +141,7 @@ export function DrivePage() {
         <Sidebar 
           onNewFolder={() => setShowNewFolder(true)}
           onUpload={() => setShowUpload(true)}
+          onImport={() => setShowImport(true)}
           onRenameFolder={(folder) => openRenameModalDirect(folder, 'folder')}
           onDeleteFolder={(folder) => openDeleteConfirmDirect(folder, 'folder')}
         />
@@ -262,6 +263,7 @@ export function DrivePage() {
       <MobileFAB
         onNewFolder={() => setShowNewFolder(true)}
         onUpload={() => setShowUpload(true)}
+        onImport={() => setShowImport(true)}
       />
 
       <UploadProgress />

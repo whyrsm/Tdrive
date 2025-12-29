@@ -76,6 +76,7 @@ function FolderTreeItem({ folder, level, onSelect, onContextMenu, path }: Folder
 interface SidebarProps {
   onNewFolder: () => void;
   onUpload: () => void;
+  onImport?: () => void;
   onRenameFolder?: (folder: FolderItem) => void;
   onDeleteFolder?: (folder: FolderItem) => void;
 }
@@ -87,7 +88,7 @@ interface SidebarContextMenu {
   folder?: FolderItem;
 }
 
-export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder }: SidebarProps) {
+export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDeleteFolder }: SidebarProps) {
   const { setCurrentFolder, setCurrentView, currentFolderId, currentView, sidebarOpen, setSidebarOpen } = useDriveStore();
   const { data: folderTree = [], isLoading } = useFolderTree();
   const { data: favoriteFolders = [] } = useFavoriteFolders();
@@ -174,6 +175,7 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
         <NewMenu 
           onNewFolder={() => { onNewFolder(); closeSidebarOnMobile(); }}
           onUpload={() => { onUpload(); closeSidebarOnMobile(); }}
+          onImport={onImport ? () => { onImport(); closeSidebarOnMobile(); } : undefined}
         />
       </div>
 

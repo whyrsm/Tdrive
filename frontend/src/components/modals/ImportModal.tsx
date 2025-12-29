@@ -1,14 +1,8 @@
-import { useState } from 'react';
-import { X, ArrowLeft, Search, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { importApi } from '../../lib/api';
 import { formatFileSize } from '../../lib/utils';
 import { cn } from '../../lib/utils';
-
-interface Dialog {
-  id: string;
-  name: string;
-  type: 'user' | 'group' | 'channel' | 'saved';
-}
 
 interface FileInfo {
   messageId: number;
@@ -33,35 +27,19 @@ interface ImportModalProps {
 }
 
 export default function ImportModal({ isOpen, onClose, onImportComplete }: ImportModalProps) {
-  const [step, setStep] = useState<'dialogs' | 'files' | 'importing'>('dialogs');
-  const [dialogs, setDialogs] = useState<Dialog[]>([]);
+  const [step, setStep] = useState<'files' | 'importing'>('files');
   const [files, setFiles] = useState<FileInfo[]>([]);
-  const [selectedDialog, setSelectedDialog] = useState<Dialog | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
 
-  const loadDialogs = async () => {
+  // Automatically load files from Saved Messages when modal opens
+  const loadFiles = async () => {
     setLoading(true);
     try {
-      const response = await importApi.getDialogs();
-      setDialogs(response.data);
-    } catch (error) {
-      console.error('Failed to load dialogs:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadFiles = async (dialog: Dialog) => {
-    setLoading(true);
-    try {
-      const response = await importApi.getDialogFiles(dialog.id, dialog.type);
+      const response = await importApi.getDialogFiles('me', 'saved');
       setFiles(response.data);
-      setSelectedDialog(dialog);
-      setStep('files');
     } catch (error) {
       console.error('Failed to load files:', error);
     } finally {
@@ -70,7 +48,7 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
   };
 
   const handleImport = async () => {
-    if (!selectedDialog || selectedFiles.size === 0) return;
+    if (selectedFiles.size === 0) return;
 
     setImporting(true);
     setStep('importing');
@@ -97,9 +75,9 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
 
       try {
         await importApi.importSingleFile(
-          selectedDialog.id,
-          selectedDialog.name,
-          selectedDialog.type,
+          'me',
+          'Saved Messages',
+          'saved',
           messageId
         );
         progress.completed.push(messageId);
@@ -121,7 +99,7 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
     }
     
     if (failCount === 0) {
-      alert(`Successfully imported ${successCount} files to folder "${selectedDialog.name}"`);
+      alert(`Successfully imported ${successCount} files to folder "Saved Messages"`);
       handleClose();
     } else {
       alert(`Imported ${successCount} files. ${failCount} files failed.`);
@@ -130,12 +108,9 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
 
   const handleClose = () => {
     if (importing) return;
-    setStep('dialogs');
-    setDialogs([]);
+    setStep('files');
     setFiles([]);
-    setSelectedDialog(null);
     setSelectedFiles(new Set());
-    setSearchQuery('');
     setImportProgress(null);
     onClose();
   };
@@ -158,19 +133,7 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
     }
   };
 
-  const filteredDialogs = dialogs.filter(d =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
-  const getDialogIcon = (type: string) => {
-    switch (type) {
-      case 'saved': return '💾';
-      case 'user': return '👤';
-      case 'group': return '👥';
-      case 'channel': return '📢';
-      default: return '💬';
-    }
-  };
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith('image/')) return '🖼️';
@@ -185,6 +148,13 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
     .filter(f => selectedFiles.has(f.messageId))
     .reduce((sum, f) => sum + f.size, 0);
 
+  // Load files when modal opens
+  useEffect(() => {
+    if (isOpen && files.length === 0 && !loading) {
+      loadFiles();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -196,17 +166,8 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
           <div className="flex items-center gap-2">
-            {step === 'files' && !importing && (
-              <button
-                onClick={() => setStep('dialogs')}
-                className="p-1 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-secondary)]"
-              >
-                <ArrowLeft size={16} strokeWidth={2} />
-              </button>
-            )}
             <h2 className="font-medium text-[var(--text-primary)]">
-              {step === 'dialogs' ? 'Import from Telegram' : 
-               step === 'importing' ? 'Importing...' : selectedDialog?.name}
+              {step === 'importing' ? 'Importing...' : 'Import from Saved Messages'}
             </h2>
           </div>
           <button 
@@ -293,53 +254,11 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
                 </div>
               )}
             </div>
-          ) : step === 'dialogs' ? (
-            <>
-              <p className="text-sm text-[var(--text-secondary)] mb-4">Select a chat to import files from:</p>
-              
-              <div className="relative mb-4">
-                <Search size={14} strokeWidth={2} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
-                <input
-                  type="text"
-                  placeholder="Search chats..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => !dialogs.length && loadDialogs()}
-                  className={cn(
-                    'w-full pl-9 pr-4 py-2 rounded text-sm',
-                    'border border-[var(--border-color)]',
-                    'focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25',
-                    'placeholder:text-[var(--text-placeholder)]',
-                    'transition-shadow'
-                  )}
-                />
-              </div>
-
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 size={20} strokeWidth={2} className="animate-spin text-[var(--text-tertiary)]" />
-                </div>
-              ) : (
-                <div className="space-y-0.5">
-                  {filteredDialogs.map((dialog) => (
-                    <button
-                      key={dialog.id}
-                      onClick={() => loadFiles(dialog)}
-                      className="w-full flex items-center gap-3 p-2.5 hover:bg-[var(--bg-hover)] rounded text-left transition-colors"
-                    >
-                      <span className="text-xl">{getDialogIcon(dialog.type)}</span>
-                      <span className="flex-1 text-sm font-medium text-[var(--text-primary)]">{dialog.name}</span>
-                      <span className="text-[var(--text-tertiary)]">→</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
           ) : (
             <>
               <p className="text-sm text-[var(--text-secondary)] mb-1">Select files to import:</p>
               <p className="text-xs text-[var(--text-tertiary)] mb-4">
-                Will be saved to folder: <span className="font-medium text-[var(--text-secondary)]">"{selectedDialog?.name}"</span>
+                Files will be saved to folder: <span className="font-medium text-[var(--text-secondary)]">"Saved Messages"</span>
               </p>
 
               {loading ? (
