@@ -1,5 +1,5 @@
 import { memo, DragEvent, useRef } from 'react';
-import { Folder, Loader2, Star } from 'lucide-react';
+import { Folder, Loader2, Star, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn, formatFileSize, formatDate, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
 import { FILE_ICON_MAP } from '@/lib/constants';
@@ -34,7 +34,7 @@ export const FileList = memo(function FileList({
   onNewFolder,
 }: FileListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { selectedItems, clearSelection } = useDriveStore();
+  const { selectedItems, clearSelection, sortField, sortDirection, setSortField, toggleSortDirection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen, { files, folders });
   const {
     dragCount,
@@ -69,6 +69,14 @@ export const FileList = memo(function FileList({
     onFileOpen,
   });
 
+  const handleColumnClick = (field: 'name' | 'size' | 'modified') => {
+    if (sortField === field) {
+      toggleSortDirection();
+    } else {
+      setSortField(field);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -101,9 +109,33 @@ export const FileList = memo(function FileList({
     >
       {selectionBoxStyle && <div style={selectionBoxStyle} />}
       <div className="hidden sm:grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 text-xs font-medium text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
-        <span>Name</span>
-        <span>Size</span>
-        <span>Modified</span>
+        <button
+          onClick={() => handleColumnClick('name')}
+          className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors text-left"
+        >
+          Name
+          {sortField === 'name' && (
+            sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+          )}
+        </button>
+        <button
+          onClick={() => handleColumnClick('size')}
+          className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors text-left"
+        >
+          Size
+          {sortField === 'size' && (
+            sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+          )}
+        </button>
+        <button
+          onClick={() => handleColumnClick('modified')}
+          className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors text-left"
+        >
+          Modified
+          {sortField === 'modified' && (
+            sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+          )}
+        </button>
       </div>
 
       {folders.map((folder) => (

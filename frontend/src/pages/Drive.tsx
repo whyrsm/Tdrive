@@ -16,7 +16,8 @@ import { MobileFAB } from '@/components/layout/MobileFAB';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch, useFavoriteFiles, useFavoriteFolders } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
-import { useState, useCallback, useEffect } from 'react';
+import { sortItems } from '@/lib/utils';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -25,7 +26,7 @@ import { foldersApi } from '@/lib/api';
 export function DrivePage() {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
-  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView, setCurrentFolder } = useDriveStore();
+  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView, setCurrentFolder, sortField, sortDirection } = useDriveStore();
   const [showImport, setShowImport] = useState(false);
   const [backgroundContextMenu, setBackgroundContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -101,6 +102,16 @@ export function DrivePage() {
     ? favoriteFolders 
     : (searchQuery ? [] : folders);
 
+  // Apply sorting
+  const sortedFiles = useMemo(
+    () => sortItems(displayFiles, sortField, sortDirection),
+    [displayFiles, sortField, sortDirection]
+  );
+  const sortedFolders = useMemo(
+    () => sortItems(displayFolders, sortField, sortDirection),
+    [displayFolders, sortField, sortDirection]
+  );
+
   const handleFolderOpen = useCallback((folder: FolderItem) => {
     addToPath(folder);
     navigate(`/drive/folder/${folder.id}`);
@@ -154,8 +165,8 @@ export function DrivePage() {
               <TrashView />
             ) : viewMode === 'grid' ? (
               <FileGrid
-                files={displayFiles}
-                folders={displayFolders}
+                files={sortedFiles}
+                folders={sortedFolders}
                 isLoading={isLoading}
                 currentFolderId={currentFolderId}
                 onFolderOpen={handleFolderOpen}
@@ -166,8 +177,8 @@ export function DrivePage() {
               />
             ) : (
               <FileList
-                files={displayFiles}
-                folders={displayFolders}
+                files={sortedFiles}
+                folders={sortedFolders}
                 isLoading={isLoading}
                 currentFolderId={currentFolderId}
                 onFolderOpen={handleFolderOpen}
@@ -248,7 +259,7 @@ export function DrivePage() {
       {showPreview && previewFile && (
         <FilePreviewModal
           file={previewFile}
-          allFiles={displayFiles}
+          allFiles={sortedFiles}
           onClose={closePreview}
           onDownload={handleDownload}
         />

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { FileItem, FolderItem } from '@/stores/drive.store';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -31,4 +32,36 @@ export function getFileIcon(mimeType: string): string {
   if (mimeType.includes('word') || mimeType.includes('document')) return 'doc';
   if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'sheet';
   return 'file';
+}
+
+type SortField = 'name' | 'size' | 'modified';
+type SortDirection = 'asc' | 'desc';
+
+export function sortItems<T extends FileItem | FolderItem>(
+  items: T[],
+  field: SortField,
+  direction: SortDirection
+): T[] {
+  const sorted = [...items].sort((a, b) => {
+    let comparison = 0;
+
+    switch (field) {
+      case 'name':
+        comparison = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        break;
+      case 'size':
+        // Folders don't have size, treat as 0
+        const sizeA = 'size' in a ? parseInt(a.size, 10) : 0;
+        const sizeB = 'size' in b ? parseInt(b.size, 10) : 0;
+        comparison = sizeA - sizeB;
+        break;
+      case 'modified':
+        comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        break;
+    }
+
+    return direction === 'asc' ? comparison : -comparison;
+  });
+
+  return sorted;
 }

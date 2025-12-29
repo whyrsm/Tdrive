@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Grid, List, LogOut, User, Menu } from 'lucide-react';
+import { Search, Grid, List, LogOut, User, Menu, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore } from '@/stores/drive.store';
 import { useAuthStore } from '@/stores/auth.store';
@@ -10,10 +10,11 @@ interface HeaderProps {
 }
 
 export function Header({ onSearch }: HeaderProps) {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, toggleSidebar } = useDriveStore();
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, toggleSidebar, sortField, sortDirection, setSortField, toggleSortDirection } = useDriveStore();
   const { user, logout } = useAuthStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +68,88 @@ export function Header({ onSearch }: HeaderProps) {
       </button>
 
       <div className="flex items-center gap-1">
+        {/* Sort dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowSortMenu(!showSortMenu)}
+            className="p-1.5 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-secondary)] flex items-center gap-1"
+            title="Sort"
+          >
+            {sortDirection === 'asc' ? (
+              <ArrowUp size={16} strokeWidth={2} />
+            ) : (
+              <ArrowDown size={16} strokeWidth={2} />
+            )}
+          </button>
+          {showSortMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowSortMenu(false)} 
+              />
+              <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg py-1 z-50 animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
+                <div className="px-3 py-1.5 text-xs text-[var(--text-tertiary)] font-medium">Sort by</div>
+                <button
+                  onClick={() => {
+                    setSortField('name');
+                    setShowSortMenu(false);
+                  }}
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-[var(--bg-hover)] text-left transition-colors',
+                    sortField === 'name' ? 'text-[var(--accent-color)] font-medium' : 'text-[var(--text-primary)]'
+                  )}
+                >
+                  Name
+                  {sortField === 'name' && (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setSortField('size');
+                    setShowSortMenu(false);
+                  }}
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-[var(--bg-hover)] text-left transition-colors',
+                    sortField === 'size' ? 'text-[var(--accent-color)] font-medium' : 'text-[var(--text-primary)]'
+                  )}
+                >
+                  Size
+                  {sortField === 'size' && (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setSortField('modified');
+                    setShowSortMenu(false);
+                  }}
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-[var(--bg-hover)] text-left transition-colors',
+                    sortField === 'modified' ? 'text-[var(--accent-color)] font-medium' : 'text-[var(--text-primary)]'
+                  )}
+                >
+                  Modified
+                  {sortField === 'modified' && (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  )}
+                </button>
+                <div className="border-t border-[var(--border-color)] my-1" />
+                <button
+                  onClick={() => {
+                    toggleSortDirection();
+                    setShowSortMenu(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--bg-hover)] text-left text-[var(--text-primary)] transition-colors"
+                >
+                  <ArrowUpDown size={14} />
+                  {sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="hidden xs:flex rounded overflow-hidden">
           <button
             onClick={() => setViewMode('grid')}

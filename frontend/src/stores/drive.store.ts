@@ -26,6 +26,8 @@ export interface FolderItem {
 
 type ViewMode = 'grid' | 'list';
 type DriveView = 'drive' | 'favorites' | 'trash';
+type SortField = 'name' | 'size' | 'modified';
+type SortDirection = 'asc' | 'desc';
 
 interface DriveState {
   // Navigation
@@ -38,12 +40,17 @@ interface DriveState {
   viewMode: ViewMode;
   searchQuery: string;
   sidebarOpen: boolean;
+  sortField: SortField;
+  sortDirection: SortDirection;
 
   // Actions
   setCurrentFolder: (folderId: string | null, path?: FolderItem[]) => void;
   setCurrentView: (view: DriveView) => void;
   setViewMode: (mode: ViewMode) => void;
   setSearchQuery: (query: string) => void;
+  setSortField: (field: SortField) => void;
+  setSortDirection: (direction: SortDirection) => void;
+  toggleSortDirection: () => void;
   toggleSelect: (id: string) => void;
   selectAll: (ids: string[]) => void;
   clearSelection: () => void;
@@ -61,6 +68,8 @@ export const useDriveStore = create<DriveState>((set, get) => ({
   viewMode: 'grid',
   searchQuery: '',
   sidebarOpen: false,
+  sortField: 'name',
+  sortDirection: 'asc',
 
   setCurrentFolder: (folderId, path) => {
     set({
@@ -82,6 +91,11 @@ export const useDriveStore = create<DriveState>((set, get) => ({
 
   setViewMode: (mode) => set({ viewMode: mode }),
   setSearchQuery: (query) => set({ searchQuery: query }),
+  setSortField: (field) => set({ sortField: field }),
+  setSortDirection: (direction) => set({ sortDirection: direction }),
+  toggleSortDirection: () => set((state) => ({ 
+    sortDirection: state.sortDirection === 'asc' ? 'desc' : 'asc' 
+  })),
 
   toggleSelect: (id) => {
     const selected = new Set(get().selectedItems);
