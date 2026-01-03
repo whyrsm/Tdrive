@@ -70,7 +70,6 @@
 │       └── schema.prisma      # Database schema
 │
 ├── docs/                       # Documentation (date-prefixed)
-└── .kiro/steering/            # Steering documents
 ```
 
 ## Development Commands
