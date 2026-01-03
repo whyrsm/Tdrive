@@ -63,8 +63,7 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
-  border: none;
-  background: none;
+  /* Don't reset background/border - let Tailwind classes work */
 }
 
 input {
