@@ -15,7 +15,13 @@ import { createHash } from 'crypto';
  */
 
 const prisma = new PrismaClient();
-const cryptoService = new CryptoService();
+
+// Mock ConfigService to satisfy dependency and read from process.env
+const configService = {
+  get: (key: string) => process.env[key],
+} as any;
+
+const cryptoService = new CryptoService(configService);
 
 async function main() {
   console.log('🔐 Starting metadata encryption migration...\n');
@@ -31,7 +37,7 @@ async function main() {
 
   for (const user of users) {
     console.log(`\n👤 Processing user: ${user.firstName || 'Unknown'} (${user.id})`);
-    
+
     // Derive encryption key from user's session
     const userKey = cryptoService.deriveKeyFromSession(user.sessionString);
 
