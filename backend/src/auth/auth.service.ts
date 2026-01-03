@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { TelegramClient } from 'telegram';
 import { AUTH } from '../common/constants';
+import { CryptoService } from '../common/services/crypto.service';
 
 interface PendingAuth {
   client: TelegramClient;
@@ -19,15 +20,16 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private telegramService: TelegramService,
-  ) {}
+    private cryptoService: CryptoService,
+  ) { }
 
   async sendCode(phone: string): Promise<{ tempToken: string }> {
     const client = await this.telegramService.createClient();
     const { phoneCodeHash } = await this.telegramService.sendCode(client, phone);
-    
+
     const tempToken = this.jwtService.sign({ phone }, { expiresIn: AUTH.CODE_EXPIRY });
     this.pendingAuths.set(tempToken, { client, phoneCodeHash, phone });
-    
+
     return { tempToken };
   }
 
@@ -38,7 +40,7 @@ export class AuthService {
     }
 
     const { client, phoneCodeHash, phone } = pending;
-    
+
     try {
       const { user, sessionString } = await this.telegramService.signIn(
         client,
@@ -47,8 +49,8 @@ export class AuthService {
         phoneCodeHash,
       );
 
-      const encryptedSession = this.telegramService.encryptSession(sessionString);
-      
+      const encryptedSession = this.cryptoService.encryptSession(sessionString);
+
       const dbUser = await this.prisma.user.upsert({
         where: { telegramId: BigInt(user.id.toString()) },
         update: {
@@ -74,7 +76,7 @@ export class AuthService {
     } catch (error: any) {
       // Map Telegram API errors to user-friendly messages
       const errorMessage = error.errorMessage || error.message || 'Unknown error';
-      
+
       if (errorMessage === 'PHONE_CODE_INVALID') {
         throw new UnauthorizedException('Invalid verification code. Please check and try again');
       }
@@ -88,7 +90,7 @@ export class AuthService {
       if (errorMessage === 'SESSION_PASSWORD_NEEDED') {
         throw new UnauthorizedException('Two-factor authentication is enabled. Please disable it in Telegram settings and try again');
       }
-      
+
       console.error('Telegram signIn error:', error);
       throw new UnauthorizedException('Invalid verification code');
     }
@@ -107,8 +109,8 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    
-    const sessionString = this.telegramService.decryptSession(user.sessionString);
+
+    const sessionString = this.cryptoService.decryptSession(user.sessionString);
     return this.telegramService.createClient(sessionString);
   }
 }
