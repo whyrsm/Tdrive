@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star, Trash2, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star, Trash2, X, Shield } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
 import { useFolderTree, useFavoriteFolders, useFavoriteFiles, useTrashedFiles, useTrashedFolders } from '@/lib/queries';
@@ -180,7 +180,7 @@ export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDel
   const sidebarContent = (
     <>
       <div className="p-2">
-        <NewMenu 
+        <NewMenu
           onNewFolder={() => { onNewFolder(); closeSidebarOnMobile(); }}
           onUpload={() => { onUpload(); closeSidebarOnMobile(); }}
           onImport={onImport ? () => { onImport(); closeSidebarOnMobile(); } : undefined}
@@ -190,7 +190,7 @@ export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDel
       {/* Separator */}
       <div className="mx-3 border-b border-[var(--border-color)]" />
 
-      <nav 
+      <nav
         className="flex-1 overflow-y-auto px-2 py-2"
         onContextMenu={handleBackgroundContextMenu}
       >
@@ -258,6 +258,20 @@ export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDel
 
       <StorageIndicator />
 
+      <div className="px-4 py-3 border-t border-[var(--border-color)]">
+        <div className="flex flex-col gap-1">
+          <Link to="/security" className="flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors py-1 group">
+            <Shield size={12} className="text-emerald-500" />
+            <span>Encrypted & Secure</span>
+          </Link>
+          <div className="flex gap-2 text-[10px] text-[var(--text-tertiary)] pl-5">
+            <Link to="/security" className="hover:text-[var(--text-secondary)] transition-colors">Security</Link>
+            <span>•</span>
+            <Link to="/privacy" className="hover:text-[var(--text-secondary)] transition-colors">Privacy</Link>
+          </div>
+        </div>
+      </div>
+
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
@@ -290,14 +304,14 @@ export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDel
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Mobile sidebar drawer */}
-      <aside 
+      <aside
         className={cn(
           'md:hidden fixed top-0 left-0 bottom-0 w-72 bg-[var(--bg-secondary)] flex flex-col z-50',
           'transform transition-transform duration-200 ease-out',

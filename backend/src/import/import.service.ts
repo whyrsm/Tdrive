@@ -21,6 +21,11 @@ export interface FileInfo {
   date: Date;
 }
 
+interface UserKeys {
+  canonical: Buffer;
+  legacy: Buffer;
+}
+
 @Injectable()
 export class ImportService {
   constructor(
@@ -28,23 +33,35 @@ export class ImportService {
     private telegramService: TelegramService,
     private authService: AuthService,
     private cryptoService: CryptoService,
-  ) {}
+  ) { }
 
   /**
-   * Gets the encryption key for a user by deriving it from their session string.
+   * Gets the encryption keys for a user.
    */
-  private async getUserKey(userId: string): Promise<Buffer> {
+  private async getUserKeys(userId: string): Promise<UserKeys> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    // Canonical Key
+    const rawSessionString = this.cryptoService.decryptSession(user.sessionString);
+    const canonical = this.cryptoService.deriveKeyFromSession(rawSessionString);
+
+    // Legacy Key
+    const legacy = this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    return { canonical, legacy };
   }
 
-  private encryptName(name: string, userKey: Buffer): string {
-    return this.cryptoService.encryptMetadata(name, userKey);
+  private encryptName(name: string, keys: UserKeys): string {
+    return this.cryptoService.encryptMetadata(name, keys.canonical);
   }
 
-  private decryptName(encryptedName: string, userKey: Buffer): string {
-    return this.cryptoService.decryptMetadata(encryptedName, userKey);
+  private decryptName(encryptedName: string, keys: UserKeys): string {
+    const val = this.cryptoService.decryptMetadata(encryptedName, keys.canonical);
+    if (val === encryptedName) {
+      return this.cryptoService.decryptMetadata(encryptedName, keys.legacy);
+    }
+    return val;
   }
 
   async getDialogs(userId: string): Promise<DialogInfo[]> {
@@ -54,7 +71,7 @@ export class ImportService {
       console.log('Fetching dialogs for user:', userId);
       const dialogs = await this.telegramService.getDialogs(client);
       console.log('Dialogs fetched:', dialogs.length);
-      
+
       const dialogInfos: DialogInfo[] = [];
 
       // Add Saved Messages first
@@ -134,21 +151,21 @@ export class ImportService {
   async importFiles(userId: string, dto: ImportFilesDto) {
     console.log('Starting import for user:', userId);
     console.log('Import DTO:', dto);
-    
-    const userKey = await this.getUserKey(userId);
+
+    const userKeys = await this.getUserKeys(userId);
     const client = await this.authService.getClientForUser(userId);
 
     try {
       // 1. Create or get folder with chat name (encrypted)
-      const encryptedChatName = this.encryptName(dto.chatName, userKey);
-      
+      const encryptedChatName = this.encryptName(dto.chatName, userKeys);
+
       // Search for existing folder by decrypting all folder names
       const existingFolders = await this.prisma.folder.findMany({
         where: { userId, parentId: null },
       });
-      
-      let folder = existingFolders.find(f => 
-        this.decryptName(f.name, userKey) === dto.chatName
+
+      let folder = existingFolders.find(f =>
+        this.decryptName(f.name, userKeys) === dto.chatName
       );
 
       if (!folder) {
@@ -188,7 +205,8 @@ export class ImportService {
         }
 
         console.log('Creating file record:', fileInfo.name);
-        const encryptedFileName = this.encryptName(fileInfo.name, userKey);
+        // Encrypt with Canonical key
+        const encryptedFileName = this.encryptName(fileInfo.name, userKeys);
         const file = await this.prisma.file.create({
           data: {
             name: encryptedFileName,
@@ -227,20 +245,20 @@ export class ImportService {
   }
 
   async importSingleFile(userId: string, dto: ImportSingleFileDto) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const client = await this.authService.getClientForUser(userId);
 
     try {
       // 1. Create or get folder with chat name (encrypted)
-      const encryptedChatName = this.encryptName(dto.chatName, userKey);
-      
+      const encryptedChatName = this.encryptName(dto.chatName, userKeys);
+
       // Search for existing folder by decrypting all folder names
       const existingFolders = await this.prisma.folder.findMany({
         where: { userId, parentId: null },
       });
-      
-      let folder = existingFolders.find(f => 
-        this.decryptName(f.name, userKey) === dto.chatName
+
+      let folder = existingFolders.find(f =>
+        this.decryptName(f.name, userKeys) === dto.chatName
       );
 
       if (!folder) {
@@ -254,12 +272,12 @@ export class ImportService {
 
       // 2. Get the entity for the source chat
       let targetEntity: any;
-      
+
       if (dto.chatType === 'saved' || dto.chatId === 'me') {
         targetEntity = new Api.InputPeerSelf();
       } else {
         const dialogs = await client.getDialogs({ limit: 100 });
-        
+
         let foundEntity: any = null;
         for (const dialog of dialogs) {
           const entity = (dialog as any).entity;
@@ -268,7 +286,7 @@ export class ImportService {
             break;
           }
         }
-        
+
         if (!foundEntity) {
           throw new Error(`Chat not found: ${dto.chatId}`);
         }
@@ -323,7 +341,7 @@ export class ImportService {
       }
 
       // 8. Create file record in database with encrypted name
-      const encryptedFileName = this.encryptName(fileInfo.name, userKey);
+      const encryptedFileName = this.encryptName(fileInfo.name, userKeys);
       const file = await this.prisma.file.create({
         data: {
           name: encryptedFileName,

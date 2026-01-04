@@ -2,20 +2,21 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TelegramClient, Api } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { TELEGRAM } from '../common/constants';
 import { TelegramApiError, FileDownloadError } from '../common/errors/file.errors';
+import { CryptoService } from '../common/services/crypto.service';
 
 @Injectable()
 export class TelegramService {
   private readonly apiId: number;
   private readonly apiHash: string;
-  private readonly encryptionKey: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private cryptoService: CryptoService,
+  ) {
     this.apiId = parseInt(this.configService.get<string>('TELEGRAM_API_ID') || '0');
     this.apiHash = this.configService.get<string>('TELEGRAM_API_HASH') || '';
-    this.encryptionKey = this.configService.get<string>('ENCRYPTION_KEY') || '';
   }
 
   async createClient(sessionString?: string): Promise<TelegramClient> {
@@ -37,7 +38,7 @@ export class TelegramService {
     } catch (error: any) {
       // Map Telegram API errors to user-friendly messages
       const errorMessage = error.errorMessage || error.message || 'Unknown error';
-      
+
       if (errorMessage === 'PHONE_NUMBER_INVALID') {
         throw new BadRequestException('Invalid phone number format. Please use international format (e.g., +1234567890)');
       }
@@ -50,7 +51,7 @@ export class TelegramService {
       if (errorMessage === 'API_ID_INVALID') {
         throw new BadRequestException('Server configuration error. Please contact support');
       }
-      
+
       console.error('Telegram sendCode error:', error);
       throw new BadRequestException(`Failed to send verification code: ${errorMessage}`);
     }
@@ -135,11 +136,11 @@ export class TelegramService {
         const messages = await client.getMessages(new Api.InputPeerSelf(), { limit });
         return messages.filter((m) => m.media) as Api.Message[];
       }
-      
+
       // For channels/groups/users, we need to find the entity from dialogs
       // This ensures we have the proper access hash
       const dialogs = await client.getDialogs({ limit: 100 });
-      
+
       let targetEntity: any = null;
       for (const dialog of dialogs) {
         const entity = (dialog as any).entity;
@@ -148,11 +149,11 @@ export class TelegramService {
           break;
         }
       }
-      
+
       if (!targetEntity) {
         throw new Error(`Chat not found: ${chatId}`);
       }
-      
+
       const messages = await client.getMessages(targetEntity, { limit });
       return messages.filter((m) => m.media) as Api.Message[];
     } catch (error) {
@@ -168,13 +169,13 @@ export class TelegramService {
     messageIds: number[],
   ): Promise<Api.Message[]> {
     let targetEntity: any;
-    
+
     if (chatType === 'saved' || fromChatId === 'me') {
       targetEntity = new Api.InputPeerSelf();
     } else {
       // Find the entity from dialogs to get proper access hash
       const dialogs = await client.getDialogs({ limit: 100 });
-      
+
       let foundEntity: any = null;
       for (const dialog of dialogs) {
         const entity = (dialog as any).entity;
@@ -183,13 +184,13 @@ export class TelegramService {
           break;
         }
       }
-      
+
       if (!foundEntity) {
         throw new Error(`Chat not found: ${fromChatId}`);
       }
       targetEntity = foundEntity;
     }
-    
+
     // First get the original messages to access their media
     const originalMessages = await client.getMessages(targetEntity, { ids: messageIds });
     const results: Api.Message[] = [];
@@ -238,22 +239,5 @@ export class TelegramService {
     return results;
   }
 
-  encryptSession(sessionString: string): string {
-    const iv = randomBytes(16);
-    const key = Buffer.from(this.encryptionKey.padEnd(32).slice(0, 32));
-    const cipher = createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(sessionString, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
-  }
 
-  decryptSession(encryptedSession: string): string {
-    const [ivHex, encrypted] = encryptedSession.split(':');
-    const iv = Buffer.from(ivHex, 'hex');
-    const key = Buffer.from(this.encryptionKey.padEnd(32).slice(0, 32));
-    const decipher = createDecipheriv('aes-256-cbc', key, iv);
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
-  }
 }

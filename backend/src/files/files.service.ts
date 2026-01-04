@@ -20,6 +20,11 @@ export interface SerializedFile {
   updatedAt: Date;
 }
 
+interface UserKeys {
+  canonical: Buffer;
+  legacy: Buffer;
+}
+
 @Injectable()
 export class FilesService {
   constructor(
@@ -27,28 +32,47 @@ export class FilesService {
     private telegramService: TelegramService,
     private authService: AuthService,
     private cryptoService: CryptoService,
-  ) {}
+  ) { }
 
   /**
-   * Gets the encryption key for a user by deriving it from their session string.
-   * This ensures each user has a unique key that the developer cannot access.
+   * Gets the encryption keys for a user.
+   * Returns both Canonical (derived from decrypted session) 
+   * and Legacy (derived from raw/encrypted session) keys.
    */
-  private async getUserKey(userId: string): Promise<Buffer> {
+  private async getUserKeys(userId: string): Promise<UserKeys> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    // Canonical Key: Derived from DECRYPTED session string (Stable, Correct)
+    const rawSessionString = this.cryptoService.decryptSession(user.sessionString);
+    const canonical = this.cryptoService.deriveKeyFromSession(rawSessionString);
+
+    // Legacy Key: Derived from ENCRYPTED session string (Fallback for existing data)
+    // This handles data that was encrypted before the session decryption fix was applied.
+    const legacy = this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    return { canonical, legacy };
   }
 
-  private encryptName(name: string, userKey: Buffer): string {
-    return this.cryptoService.encryptMetadata(name, userKey);
+  private encryptName(name: string, keys: UserKeys): string {
+    // Always encrypt using the Canonical key for new/updated data
+    return this.cryptoService.encryptMetadata(name, keys.canonical);
   }
 
-  private decryptName(encryptedName: string, userKey: Buffer): string {
-    return this.cryptoService.decryptMetadata(encryptedName, userKey);
+  private decryptName(encryptedName: string, keys: UserKeys): string {
+    // 1. Try Canonical Key
+    const val = this.cryptoService.decryptMetadata(encryptedName, keys.canonical);
+
+    // 2. If decryption failed (returns input), try Legacy Key
+    if (val === encryptedName) {
+      return this.cryptoService.decryptMetadata(encryptedName, keys.legacy);
+    }
+
+    return val;
   }
 
   async findAll(userId: string, folderId?: string | null) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const files = await this.prisma.file.findMany({
       where: {
         userId,
@@ -57,13 +81,13 @@ export class FilesService {
       },
       orderBy: { createdAt: 'desc' }, // Sort by date since names are encrypted
     });
-    return files.map(f => this.serializeFileWithDecryption(f, userKey));
+    return files.map(f => this.serializeFileWithDecryption(f, userKeys));
   }
 
   async findOne(id: string, userId: string) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const file = await this.findOneRaw(id, userId);
-    return this.serializeFileWithDecryption(file, userKey);
+    return this.serializeFileWithDecryption(file, userKeys);
   }
 
   private async findOneRaw(id: string, userId: string) {
@@ -87,9 +111,9 @@ export class FilesService {
     file: Express.Multer.File,
     folderId?: string,
   ) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const client = await this.authService.getClientForUser(userId);
-    
+
     try {
       const message = await this.telegramService.uploadFile(
         client,
@@ -98,8 +122,8 @@ export class FilesService {
         file.mimetype,
       );
 
-      // Encrypt the filename before storing
-      const encryptedName = this.encryptName(file.originalname, userKey);
+      // Encrypt the filename before storing (using Canonical key)
+      const encryptedName = this.encryptName(file.originalname, userKeys);
 
       const dbFile = await this.prisma.file.create({
         data: {
@@ -112,36 +136,36 @@ export class FilesService {
         },
       });
 
-      return this.serializeFileWithDecryption(dbFile, userKey);
+      return this.serializeFileWithDecryption(dbFile, userKeys);
     } finally {
       await client.disconnect();
     }
   }
 
   async download(id: string, userId: string): Promise<{ buffer: Buffer; file: SerializedFile }> {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const file = await this.findOneRaw(id, userId);
     const client = await this.authService.getClientForUser(userId);
-    
+
     try {
       const buffer = await this.telegramService.downloadFile(
         client,
         Number(file.messageId),
       );
-      return { buffer, file: this.serializeFileWithDecryption(file, userKey) };
+      return { buffer, file: this.serializeFileWithDecryption(file, userKeys) };
     } finally {
       await client.disconnect();
     }
   }
 
   async move(id: string, userId: string, dto: MoveFileDto) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     await this.findOneRaw(id, userId);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { folderId: dto.folderId || null },
     });
-    return this.serializeFileWithDecryption(updated, userKey);
+    return this.serializeFileWithDecryption(updated, userKeys);
   }
 
   async batchMove(userId: string, dto: BatchMoveFilesDto) {
@@ -162,30 +186,30 @@ export class FilesService {
   }
 
   async rename(id: string, userId: string, dto: RenameFileDto) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     await this.findOneRaw(id, userId);
     // Encrypt the new name before storing
-    const encryptedName = this.encryptName(dto.name, userKey);
+    const encryptedName = this.encryptName(dto.name, userKeys);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { name: encryptedName },
     });
-    return this.serializeFileWithDecryption(updated, userKey);
+    return this.serializeFileWithDecryption(updated, userKeys);
   }
 
   async remove(id: string, userId: string) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     await this.findOneRaw(id, userId);
     // Soft delete - move to trash
     const updated = await this.prisma.file.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
-    return this.serializeFileWithDecryption(updated, userKey);
+    return this.serializeFileWithDecryption(updated, userKeys);
   }
 
   async batchDelete(userId: string, dto: BatchDeleteFilesDto) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     // Verify all files belong to user and are not already deleted
     const files = await this.prisma.file.findMany({
       where: { id: { in: dto.fileIds }, userId, deletedAt: null },
@@ -205,16 +229,16 @@ export class FilesService {
 
   // Trash methods
   async findTrashed(userId: string) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const files = await this.prisma.file.findMany({
       where: { userId, deletedAt: { not: null } },
       orderBy: { deletedAt: 'desc' },
     });
-    return files.map(f => this.serializeFileWithDecryption(f, userKey));
+    return files.map(f => this.serializeFileWithDecryption(f, userKeys));
   }
 
   async restore(id: string, userId: string) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const file = await this.findOneRawIncludingTrashed(id, userId);
     if (!file.deletedAt) {
       throw new NotFoundException('File is not in trash');
@@ -223,7 +247,7 @@ export class FilesService {
       where: { id },
       data: { deletedAt: null },
     });
-    return this.serializeFileWithDecryption(updated, userKey);
+    return this.serializeFileWithDecryption(updated, userKeys);
   }
 
   async permanentDelete(id: string, userId: string) {
@@ -231,7 +255,7 @@ export class FilesService {
     if (!file.deletedAt) {
       throw new NotFoundException('File must be in trash before permanent deletion');
     }
-    
+
     const client = await this.authService.getClientForUser(userId);
     try {
       await this.telegramService.deleteMessage(client, Number(file.messageId));
@@ -261,12 +285,12 @@ export class FilesService {
           // Continue even if Telegram delete fails
         }
       }
-      
+
       // Delete from database
       await this.prisma.file.deleteMany({
         where: { userId, deletedAt: { not: null } },
       });
-      
+
       return { count: trashedFiles.length };
     } finally {
       await client.disconnect();
@@ -275,39 +299,39 @@ export class FilesService {
 
   async search(userId: string, query: string) {
     // Since names are encrypted, we need to decrypt and filter client-side
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const files = await this.prisma.file.findMany({
       where: {
         userId,
         deletedAt: null,
       },
     });
-    
+
     // Decrypt names and filter by query
     const lowerQuery = query.toLowerCase();
     return files
-      .map(f => this.serializeFileWithDecryption(f, userKey))
+      .map(f => this.serializeFileWithDecryption(f, userKeys))
       .filter(f => f.name.toLowerCase().includes(lowerQuery))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async findFavorites(userId: string) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const files = await this.prisma.file.findMany({
       where: { userId, isFavorite: true, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
-    return files.map(f => this.serializeFileWithDecryption(f, userKey));
+    return files.map(f => this.serializeFileWithDecryption(f, userKeys));
   }
 
   async toggleFavorite(id: string, userId: string) {
-    const userKey = await this.getUserKey(userId);
+    const userKeys = await this.getUserKeys(userId);
     const file = await this.findOneRaw(id, userId);
     const updated = await this.prisma.file.update({
       where: { id },
       data: { isFavorite: !file.isFavorite },
     });
-    return this.serializeFileWithDecryption(updated, userKey);
+    return this.serializeFileWithDecryption(updated, userKeys);
   }
 
   private serializeFile(file: PrismaFile): SerializedFile {
@@ -318,10 +342,10 @@ export class FilesService {
     };
   }
 
-  private serializeFileWithDecryption(file: PrismaFile, userKey: Buffer): SerializedFile {
+  private serializeFileWithDecryption(file: PrismaFile, keys: UserKeys): SerializedFile {
     return {
       ...file,
-      name: this.decryptName(file.name, userKey),
+      name: this.decryptName(file.name, keys),
       size: file.size.toString(),
       messageId: file.messageId.toString(),
     };
