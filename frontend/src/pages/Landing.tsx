@@ -507,6 +507,7 @@ export function LandingPage() {
 
           <div className="flex items-center gap-8 text-sm text-[var(--text-secondary)]">
             <Link to="/privacy" className="hover:text-[var(--text-primary)] transition-colors">Privacy</Link>
+            <Link to="/security" className="hover:text-[var(--text-primary)] transition-colors">Security</Link>
             <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Terms</a>
             <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Contact</a>
           </div>
