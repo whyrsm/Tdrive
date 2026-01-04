@@ -6,15 +6,12 @@ import {
   FolderOpen,
   ArrowRight,
   Upload,
-  Smartphone,
   Menu,
   X,
   Users,
   Github,
   Lock,
-  Heart,
-  Eye,
-  Code2
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -102,9 +99,9 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[var(--border-color)] shadow-sm mb-6">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">Powered by Telegram</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] mb-6 border border-[var(--border-default)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
+              <span className="text-xs font-medium uppercase tracking-wide">Powered by Telegram</span>
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-[var(--text-primary)] leading-[1.1]">
@@ -113,13 +110,13 @@ export function LandingPage() {
             </h1>
 
             <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-4 leading-relaxed">
-              Unlimited storage powered by Telegram. <br className="hidden md:block" />
-              No more deleting photos or "upgrade for more storage" emails.
+              Stop deleting photos to clear space. <br className="hidden md:block" />
+              Get <strong>True Unlimited Cloud Storage</strong> for free, leveraging the power of Telegram.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
               <Link
                 to="/login"
-                className="bg-black text-white h-12 px-8 rounded-md font-medium text-base hover:bg-neutral-800 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 shadow-lg shadow-black/5"
+                className="bg-black text-white h-12 px-8 rounded-md font-medium text-base hover:bg-neutral-800 transition-all flex items-center gap-2"
               >
                 Get Started Free
                 <ArrowRight size={18} />
@@ -213,192 +210,201 @@ export function LandingPage() {
             {/* Card 1: Unlimited */}
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-white rounded-xl border border-[var(--border-color)] p-8 shadow-sm hover:shadow-md transition-all group flex flex-col"
+              className="bg-white rounded-lg border border-[var(--border-default)] p-8 hover:bg-[var(--bg-secondary)] transition-all group flex flex-col"
             >
-              <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center mb-6 text-black">
-                <Cloud size={24} />
+              <div className="w-10 h-10 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md flex items-center justify-center mb-6">
+                <Cloud size={20} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Unlimited & Free</h3>
-              <p className="text-[var(--text-secondary)] text-sm">
-                Leveraging Telegram's API, we offer true unlimited cloud storage for all your files. No caps, no tiers.
+              <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">Unlimited & Free</h3>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
+                We leverage Telegram's unlimited cloud infrastructure to give you infinite space for your files. No 15GB limits. No monthly subscriptions.
               </p>
             </motion.div>
 
-            {/* Card 2: Private */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-white rounded-xl border border-[var(--border-color)] p-8 shadow-sm hover:shadow-md transition-all group flex flex-col"
-            >
-              <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center mb-6 text-black">
-                <Shield size={24} />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Private by Design</h3>
-              <p className="text-[var(--text-secondary)] text-sm">
-                Your files are stored in your own Telegram "Saved Messages". We act as a bridge, we don't spy.
-              </p>
-            </motion.div>
+            {/* Card 2: Secure */}
+            <Link to="/security" className="block h-full">
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="bg-white rounded-lg border border-[var(--border-default)] p-8 hover:bg-[var(--bg-secondary)] transition-all group flex flex-col h-full cursor-pointer"
+              >
+                <div className="w-10 h-10 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md flex items-center justify-center mb-6">
+                  <Shield size={20} />
+                </div>
+                <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)] flex items-center gap-2">
+                  Secure
+                  <ArrowRight size={16} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[var(--text-tertiary)]" />
+                </h3>
+                <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
+                  <strong>100% Private.</strong> We technically can't read your files or see your folder names. Only you have access to your data.
+                </p>
+                <div className="mt-auto text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                  Learn how it works →
+                </div>
+              </motion.div>
+            </Link>
 
             {/* Card 3: Organization */}
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-white rounded-xl border border-[var(--border-color)] p-8 shadow-sm hover:shadow-md transition-all group flex flex-col"
+              className="bg-white rounded-lg border border-[var(--border-default)] p-8 hover:bg-[var(--bg-secondary)] transition-all group flex flex-col"
             >
-              <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center mb-6 text-black">
-                <FolderOpen size={24} />
+              <div className="w-10 h-10 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md flex items-center justify-center mb-6">
+                <FolderOpen size={20} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Easy Organization</h3>
-              <p className="text-[var(--text-secondary)] text-sm">
-                Folders, subfolders, and easy file management just like your computer's finder or explorer.
+              <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">Easy to Organize</h3>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
+                Turn your chaotic chat history into a structured drive. Create folders, subfolders, and search your files just like on your computer.
               </p>
             </motion.div>
           </div>
         </section>
 
         {/* How It Works */}
-        <section id="how-it-works" className="max-w-4xl mx-auto px-6 mb-32">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">How it works</h2>
-            <p className="text-[var(--text-secondary)] max-w-lg mx-auto">
-              Your Telegram account is already an unlimited cloud. We just give it a proper interface.
+        <section id="how-it-works" className="max-w-6xl mx-auto px-6 mb-32">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl font-semibold tracking-tight mb-4 text-[var(--text-primary)]">How it works</h2>
+            <p className="text-[var(--text-secondary)] max-w-lg mx-auto text-lg">
+              Four simple steps to unlimited freedom.
             </p>
           </div>
 
-          <div className="relative">
-            {/* Vertical Line */}
-            <div className="absolute left-[27px] top-4 bottom-4 w-[2px] border-l-2 border-dotted border-[var(--border-color)] md:left-1/2 md:-ml-[1px]" />
-
-            <div className="space-y-16">
-              {/* Step 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="relative flex items-center gap-8 md:justify-center"
-              >
-                <div className="md:w-1/2 md:text-right hidden md:block pr-12">
-                  <h3 className="text-xl font-semibold mb-2">Connect your Telegram</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    Log in securely with your phone number. We use your Telegram account as your personal unlimited storage drive.
-                  </p>
-                </div>
-
-                <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full bg-white border border-[var(--border-color)] flex items-center justify-center shadow-sm text-black font-bold text-lg">
-                  1
-                </div>
-
-                <div className="md:w-1/2 md:hidden">
-                  <h3 className="text-xl font-semibold mb-2">Connect your Telegram</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    Log in securely. We use your Telegram account as your personal unlimited storage drive.
-                  </p>
-                </div>
-
-                <div className="hidden md:block md:w-1/2 pl-12">
-                  <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-2xl flex items-center justify-center transform rotate-3 hover:rotate-6 transition-transform">
-                    <Smartphone size={32} className="text-[var(--text-primary)]" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Step 1 */}
+            <div className="group">
+              <div className="bg-white border border-[var(--border-default)] rounded-xl p-6 h-64 mb-6 relative overflow-hidden flex flex-col items-center justify-center transition-all hover:border-[var(--border-strong)]">
+                {/* Visual: Login Form */}
+                <div className="w-40 bg-[var(--bg-secondary)] rounded-lg p-4 border border-[var(--border-default)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm">
+                  <div className="w-8 h-8 bg-[#229ED9] rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" /></svg>
+                  </div>
+                  <div className="h-2 bg-[var(--border-default)] rounded w-full mb-2"></div>
+                  <div className="h-8 bg-[var(--text-primary)] rounded w-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full mx-0.5 animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-white rounded-full mx-0.5 animate-pulse delay-75"></div>
+                    <div className="w-1.5 h-1.5 bg-white rounded-full mx-0.5 animate-pulse delay-150"></div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">1. Connect Telegram</h3>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
+                Log in with your existing Telegram account to authenticate and create your vault.
+              </p>
+            </div>
 
-              {/* Step 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="relative flex items-center gap-8 md:justify-center"
-              >
-                <div className="hidden md:block md:w-1/2 pr-12">
-                  <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-2xl flex items-center justify-center ml-auto transform -rotate-3 hover:-rotate-6 transition-transform">
-                    <Upload size={32} className="text-[var(--text-primary)]" />
+            {/* Step 2 */}
+            <div className="group">
+              <div className="bg-white border border-[var(--border-default)] rounded-xl p-6 h-64 mb-6 relative overflow-hidden flex flex-col items-center justify-center transition-all hover:border-[var(--border-strong)]">
+                {/* Visual: Upload */}
+                <div className="w-40 h-32 border-2 border-dashed border-[var(--border-default)] rounded-lg flex flex-col items-center justify-center relative bg-[var(--bg-secondary)]/30">
+                  <div className="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+                  <Upload size={24} className="text-[var(--text-tertiary)] mb-2" />
+                  <div className="text-[10px] text-[var(--text-tertiary)]">Drop files here</div>
+
+                  {/* Floating file */}
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bg-white border border-[var(--border-default)] p-2 rounded shadow-sm top-4 right-4"
+                  >
+                    <div className="w-6 h-8 bg-red-100 rounded-sm"></div>
+                  </motion.div>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">2. Upload Files</h3>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
+                Drag and drop your photos and documents. We process them locally on your device.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="group">
+              <div className="bg-white border border-[var(--border-default)] rounded-xl p-6 h-64 mb-6 relative overflow-hidden flex flex-col items-center justify-center transition-all hover:border-[var(--border-strong)]">
+                {/* Visual: Security */}
+                <div className="w-40 h-32 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)] flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-1 opacity-10">
+                    {Array.from({ length: 16 }).map((_, i) => (
+                      <div key={i} className="bg-[var(--text-primary)] rounded-full w-1 h-1"></div>
+                    ))}
+                  </div>
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border border-[var(--border-default)] shadow-sm z-10">
+                    <Lock size={24} className="text-[var(--text-primary)]" />
+                  </div>
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 border-2 border-[#229ED9]/20 rounded-lg"
+                  />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">3. Encrypted & Safe</h3>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
+                Every file is encrypted with a unique key. Only you have access to your data.
+              </p>
+              <Link to="/security" className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1 mt-1">
+                Learn about our security →
+              </Link>
+            </div>
+
+            {/* Step 4 */}
+            <div className="group">
+              <div className="bg-white border border-[var(--border-default)] rounded-xl p-6 h-64 mb-6 relative overflow-hidden px-8 py-10 transition-all hover:border-[var(--border-strong)]">
+                {/* Visual: Folders */}
+                <div className="w-full h-full bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)] p-4 space-y-3 shadow-inner">
+                  <div className="flex gap-2">
+                    <div className="w-16 h-4 bg-white rounded border border-[var(--border-default)]"></div>
+                    <div className="w-16 h-4 bg-white rounded border border-[var(--border-default)]"></div>
+                  </div>
+                  <div className="h-[1px] bg-[var(--border-default)] w-full"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-white rounded w-3/4 border border-[var(--border-default)] flex items-center px-2">
+                      <div className="w-2 h-2 bg-indigo-100 rounded-full"></div>
+                    </div>
+                    <div className="h-4 bg-white rounded w-1/2 border border-[var(--border-default)] flex items-center px-2">
+                      <div className="w-2 h-2 bg-emerald-100 rounded-full"></div>
+                    </div>
                   </div>
                 </div>
-
-                <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full bg-white border border-[var(--border-color)] flex items-center justify-center shadow-sm text-black font-bold text-lg">
-                  2
-                </div>
-
-                <div className="md:w-1/2 md:pl-12">
-                  <h3 className="text-xl font-semibold mb-2">Upload to 'Saved Messages'</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    When you upload a file here, it's instantly forwarded to your private "Saved Messages" chat on Telegram.
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Step 3 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="relative flex items-center gap-8 md:justify-center"
-              >
-                <div className="md:w-1/2 md:text-right hidden md:block pr-12">
-                  <h3 className="text-xl font-semibold mb-2">Organize & Access</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    We index those files so you can browse them like a real drive with folders, search, and previews.
-                  </p>
-                </div>
-
-                <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full bg-black border border-black flex items-center justify-center shadow-md text-white font-bold text-lg">
-                  3
-                </div>
-
-                <div className="md:w-1/2 md:hidden">
-                  <h3 className="text-xl font-semibold mb-2">Organize & Access</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    We index those files so you can browse them like a real drive with folders, search, and previews.
-                  </p>
-                </div>
-
-                <div className="hidden md:block md:w-1/2 pl-12">
-                  <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-2xl flex items-center justify-center transform rotate-3 hover:rotate-6 transition-transform">
-                    <FolderOpen size={32} className="text-[var(--text-primary)]" />
-                  </div>
-                </div>
-              </motion.div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">4. Organized Forever</h3>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
+                Your files are indexed and sorted. Access them from any device, anytime.
+              </p>
             </div>
           </div>
         </section>
 
 
         {/* Open Source Section */}
-        <section className="max-w-6xl mx-auto px-6 mb-32">
-          <div className="bg-[#111] rounded-3xl p-8 md:p-12 relative overflow-hidden text-white border border-[#333]">
-            {/* Ambient Background */}
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(59,130,246,0.15)_0%,transparent_70%)] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+        <section className="max-w-5xl mx-auto px-6 mb-32">
+          <div className="bg-[#191919] rounded-lg p-8 md:p-12 text-white border border-[#333]">
 
-            <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 mb-6 backdrop-blur-sm"
-                >
-                  <Github size={14} className="text-white" />
+            <div className="flex flex-col md:flex-row gap-12 items-center">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-white/10 text-neutral-300 mb-6 border border-white/5">
+                  <Github size={14} />
                   <span className="text-xs font-medium">Open Source</span>
-                </motion.div>
+                </div>
 
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">
+                <h2 className="text-3xl font-semibold mb-6 tracking-tight text-white">
                   Transparent.<br />
-                  <span className="text-white/50">Community Driven.</span>
+                  <span className="text-neutral-500">Community Driven.</span>
                 </h2>
 
-                <p className="text-gray-400 leading-relaxed mb-8 text-lg">
-                  Aligned with Telegram's mission, Telebox is an open-source project built for user freedom. We provide a fast, secure, and private interface for your cloud files, standing firmly against data selling and commercial surveillance. No targeted ads, no tracking. Just a truly free, unlimited storage experience.
+                <p className="text-neutral-400 leading-relaxed mb-8 text-lg">
+                  Aligned with Telegram's mission, Telebox is an open-source project built for user freedom. We stand firmly against data selling and commercial surveillance.
                 </p>
 
                 <div className="flex flex-col gap-3 mb-8">
-                  <div className="flex items-center gap-3 text-gray-300">
-                    <Shield size={20} className="text-green-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-neutral-300">
+                    <Shield size={16} className="text-neutral-500 shrink-0" />
                     <span className="text-sm">Privacy-first architecture</span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-300">
-                    <Users size={20} className="text-blue-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-neutral-300">
+                    <Users size={16} className="text-neutral-500 shrink-0" />
                     <span className="text-sm">Driven by the community</span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-300">
-                    <Lock size={20} className="text-purple-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-neutral-300">
+                    <Lock size={16} className="text-neutral-500 shrink-0" />
                     <span className="text-sm">No ads, no tracking</span>
                   </div>
                 </div>
@@ -407,73 +413,57 @@ export function LandingPage() {
                   href="https://github.com/whyrsm/telebox"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-black px-4 py-2 rounded font-medium hover:bg-neutral-200 transition-colors text-sm"
                 >
-                  <Github size={20} />
+                  <Github size={16} />
                   Star on GitHub
                 </a>
               </div>
 
-              {/* Right Side Visual - Floating Cards */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="relative hidden md:flex items-center justify-center min-h-[400px]"
-              >
-                {/* Cards Container */}
-                <div className="relative w-full max-w-[400px]">
+              {/* Right Side Visual - Simplified */}
+              <div className="hidden md:block flex-1 border border-white/10 rounded-lg p-8 bg-white/5 relative overflow-hidden group hover:border-white/20 transition-colors">
+                <div className="absolute top-0 right-0 p-32 bg-blue-500/10 rounded-full blur-3xl -tranaslate-y-1/2 translate-x-1/2"></div>
 
-                  {/* Central Logo/Orb */}
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                    <FileText size={18} className="text-neutral-400" />
+                    <div className="text-sm text-neutral-300 font-mono">mission.md</div>
+                  </div>
 
-                  {/* Card 1: Public Code */}
-                  <motion.div
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-0 right-0 bg-[#222]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center gap-4 shadow-xl z-20 max-w-[200px]"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
-                      <Code2 size={20} />
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <div>
+                        <div className="text-white text-sm font-medium">No Hidden Code</div>
+                        <div className="text-neutral-500 text-xs mt-0.5">You don't have to trust us. You can verify us.</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-white font-medium text-sm">Public Code</div>
-                      <div className="text-xs text-gray-400">100% Open Source</div>
-                    </div>
-                  </motion.div>
 
-                  {/* Card 2: Transparent */}
-                  <motion.div
-                    animate={{ y: [0, -12, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute top-24 left-0 bg-[#222]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center gap-4 shadow-xl z-10 max-w-[210px]"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
-                      <Eye size={20} />
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <div>
+                        <div className="text-white text-sm font-medium">Zero Data Selling</div>
+                        <div className="text-neutral-500 text-xs mt-0.5">We are funded by donations, not your data.</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-white font-medium text-sm">Fully Transparent</div>
-                      <div className="text-xs text-gray-400">No hidden trackers</div>
-                    </div>
-                  </motion.div>
 
-                  {/* Card 3: Community */}
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    className="absolute bottom-10 right-10 bg-[#222]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center gap-4 shadow-xl z-20 max-w-[220px]"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400">
-                      <Heart size={20} />
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <div>
+                        <div className="text-white text-sm font-medium">Community Audited</div>
+                        <div className="text-neutral-500 text-xs mt-0.5">Security researchers review every update.</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-white font-medium text-sm">Community Powered</div>
-                      <div className="text-xs text-gray-400">Built for you</div>
-                    </div>
-                  </motion.div>
-
+                  </div>
                 </div>
-              </motion.div>
+              </div>
+
             </div>
           </div>
         </section>

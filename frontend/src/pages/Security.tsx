@@ -29,9 +29,9 @@ export function SecurityPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 mb-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] mb-6 border border-[var(--border-default)]">
                         <Shield size={14} />
-                        <span className="text-xs font-semibold uppercase tracking-wide">Security Architecture</span>
+                        <span className="text-xs font-medium uppercase tracking-wide">Security Architecture</span>
                     </div>
 
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-[var(--text-primary)]">
@@ -42,33 +42,33 @@ export function SecurityPage() {
                         Here is exactly how Telebox keeps your files private, even from us.
                     </p>
 
-                    <div className="grid gap-12">
+                    <div className="grid gap-8">
 
                         {/* Principle 1: Zero Knowledge */}
-                        <section className="bg-white rounded-2xl p-8 border border-[var(--border-color)] shadow-sm">
+                        <section className="bg-white rounded-lg p-8 border border-[var(--border-default)]">
                             <div className="flex items-start gap-6">
-                                <div className="bg-green-100 text-green-600 p-3 rounded-xl shrink-0">
-                                    <Key size={28} />
+                                <div className="bg-[var(--bg-secondary)] text-[var(--text-primary)] p-3 rounded-md shrink-0">
+                                    <Key size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold mb-3">No Master Key</h2>
+                                    <h2 className="text-xl font-semibold mb-3">We Can't See Your Data</h2>
                                     <p className="text-[var(--text-secondary)] leading-relaxed mb-4">
-                                        Most cloud providers hold a "master key" that can decrypt everyone's files. <strong>Telebox does not.</strong>
+                                        Most cloud apps can peek at your files. <strong>We cannot.</strong> We designed Telebox so that we physically cannot read your files even if we wanted to.
                                     </p>
                                     <p className="text-[var(--text-secondary)] leading-relaxed">
                                         Your encryption key is generated dynamically from your unique Telegram session. This means:
                                     </p>
                                     <ul className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
                                         <li className="flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
                                             We cannot see your file names or folder structure.
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
                                             If our database is stolen, the hackers see only scrambled nonsense.
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
                                             You are the only one who can unlock your drive.
                                         </li>
                                     </ul>
@@ -77,13 +77,13 @@ export function SecurityPage() {
                         </section>
 
                         {/* Principle 2: Telegram Storage */}
-                        <section className="bg-white rounded-2xl p-8 border border-[var(--border-color)] shadow-sm">
+                        <section className="bg-white rounded-lg p-8 border border-[var(--border-default)]">
                             <div className="flex items-start gap-6">
-                                <div className="bg-[#229ED9]/10 text-[#229ED9] p-3 rounded-xl shrink-0">
-                                    <Server size={28} />
+                                <div className="bg-[var(--bg-secondary)] text-[var(--text-primary)] p-3 rounded-md shrink-0">
+                                    <Server size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold mb-3">Stored on Telegram</h2>
+                                    <h2 className="text-xl font-semibold mb-3">Stored on Telegram</h2>
                                     <p className="text-[var(--text-secondary)] leading-relaxed mb-4">
                                         We don't store your actual files on our servers. When you upload a file, it goes directly to Telegram's secure cloud.
                                     </p>
@@ -92,11 +92,11 @@ export function SecurityPage() {
                                     </p>
                                     <ul className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
                                         <li className="flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
                                             <strong>Proven Security:</strong> Telegram's MTProto encryption is battle-tested.
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
                                             <strong>Redundancy:</strong> Your files are distributed across Telegram's global data centers.
                                         </li>
                                     </ul>
@@ -105,7 +105,7 @@ export function SecurityPage() {
                         </section>
 
                         {/* Technical Detail: Metadata Encryption */}
-                        <section className="bg-[var(--bg-tertiary)] rounded-2xl p-8 border border-[var(--border-color)]">
+                        <section className="bg-[var(--bg-secondary)] rounded-lg p-8 border border-[var(--border-default)]">
                             <div className="flex items-center gap-3 mb-6">
                                 <Database size={20} className="text-[var(--text-secondary)]" />
                                 <h3 className="text-lg font-semibold">Technical Deep Dive: The Metadata</h3>
@@ -113,17 +113,17 @@ export function SecurityPage() {
 
                             <div className="grid md:grid-cols-2 gap-8">
                                 <div>
-                                    <h4 className="font-medium mb-2">What we store:</h4>
+                                    <h4 className="font-medium mb-2 text-sm">What we store:</h4>
                                     <p className="text-sm text-[var(--text-secondary)] mb-4">
                                         To make the app fast, we save a list of your files locally. But we don't save the names in plain text.
                                     </p>
-                                    <div className="font-mono text-xs bg-black/5 p-3 rounded border border-black/5">
-                                        <div className="text-red-500 line-through mb-1">"My Secret Project"</div>
-                                        <div className="text-green-600">"a7f3:9x82:1b4c..."</div>
+                                    <div className="font-mono text-xs bg-[var(--bg-primary)] p-3 rounded border border-[var(--border-default)]">
+                                        <div className="text-[var(--text-secondary)] line-through mb-1 opacity-50">"My Secret Project"</div>
+                                        <div className="text-[var(--text-primary)]">"a7f3:9x82:1b4c..."</div>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="font-medium mb-2">How we encrypt it:</h4>
+                                    <h4 className="font-medium mb-2 text-sm">How we encrypt it:</h4>
                                     <p className="text-sm text-[var(--text-secondary)]">
                                         We use <strong>AES-256-GCM</strong>, the industry standard for secure data. Even better, we use a unique random "salt" (IV) for every single file.
                                     </p>
