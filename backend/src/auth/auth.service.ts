@@ -51,15 +51,23 @@ export class AuthService {
 
       const encryptedSession = this.cryptoService.encryptSession(sessionString);
 
+      // Check if user already exists
+      const existingUser = await this.prisma.user.findUnique({
+        where: { telegramId: BigInt(user.id.toString()) },
+      });
+
       const dbUser = await this.prisma.user.upsert({
         where: { telegramId: BigInt(user.id.toString()) },
         update: {
-          sessionString: encryptedSession,
+          // CRITICAL: Do NOT update sessionString for existing users!
+          // Changing the session would change the encryption key and break access to all encrypted data.
+          // Only update user profile information.
           firstName: user.firstName || null,
           lastName: user.lastName || null,
           phone,
         },
         create: {
+          // For new users, set the initial session string
           telegramId: BigInt(user.id.toString()),
           sessionString: encryptedSession,
           firstName: user.firstName || null,
