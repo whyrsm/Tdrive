@@ -51,10 +51,13 @@ export class AuthService {
 
       const encryptedSession = this.cryptoService.encryptSession(sessionString);
 
+      // IMPORTANT: Only set session_string on user creation, NOT on update
+      // This ensures the encryption key (derived from session_string) remains stable
+      // If we update session_string on every login, all encrypted file/folder names become unreadable
       const dbUser = await this.prisma.user.upsert({
         where: { telegramId: BigInt(user.id.toString()) },
         update: {
-          sessionString: encryptedSession,
+          // DO NOT update sessionString - keep the original to maintain encryption key stability
           firstName: user.firstName || null,
           lastName: user.lastName || null,
           phone,
