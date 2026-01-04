@@ -1,5 +1,16 @@
 # Release Notes
 
+## [v0.2.1] - 2026-01-04
+
+### ✨ Making Telebox Simpler & More Transparent
+*This update focuses on making our security values clear and the experience more human.*
+
+#### 🛡️ Peace of Mind, Front and Center
+- **Security & Privacy Hub**: We’ve added dedicated spaces to explain exactly how we protect your data. No more guessing—just clear, honest information about your privacy.
+- **Safety at a Glance**: A new security indicator in your drive sidebar gives you the confidence that your files are always encrypted and purely yours.
+
+---
+
 ## [v0.2.0] - 2026-01-03
 
 ### 🎉 New Features
@@ -114,8 +125,21 @@ This is the first official release of **Telebox** - a self-hosted cloud storage 
 
 ## Version History
 
+- **v0.2.1** (2026-01-04) - Security hub, UI revamp, and design system alignment
 - **v0.2.0** (2026-01-03) - Move To functionality and modal improvements
 - **v0.1.0** (2025-12-29) - Initial release with core features
+
+---
+
+## Upgrade Notes
+
+### From v0.2.0 to v0.2.1
+
+Fully compatible. No breaking database or API changes.
+
+**Updates:**
+- New background and text variables applied for the updated design system.
+- Simplified technical copy for better user conversion.
 
 ---
 
